@@ -27,8 +27,13 @@ function AcceptPage() {
   });
 
   const roleOptions = useMemo(() => {
-    const roles = Array.from(new Set(pendingUsers.map((user) => user.role))).sort();
-    return [{ value: "all", label: "All" }, ...roles.map((role) => ({ value: role, label: role }))];
+    const roles = Array.from(
+      new Set(pendingUsers.map((user) => user.role)),
+    ).sort();
+    return [
+      { value: "all", label: "All" },
+      ...roles.map((role) => ({ value: role, label: role })),
+    ];
   }, [pendingUsers]);
 
   const filteredUsers = useMemo(() => {
@@ -61,104 +66,133 @@ function AcceptPage() {
   return (
     <div className="flex min-h-svh flex-col bg-[#f4f5f8] text-[#10131a]">
       <header className="border-b border-[#d9dee8] bg-white">
-        <div className="mx-auto flex w-full max-w-[1240px] flex-wrap items-center justify-between gap-4 px-4 py-5 md:px-8">
+        <div className="mx-auto flex w-full max-w-[1120px] flex-wrap items-center justify-between gap-3 px-4 py-4 md:px-6">
           <div className="flex items-center gap-4">
             <button
               type="button"
-              className="inline-flex size-10 items-center justify-center rounded-md text-[#5f6675] transition-colors hover:bg-[#eef1f6]"
+              className="inline-flex size-9 items-center justify-center rounded-md text-[#5f6675] transition-colors hover:bg-[#eef1f6]"
               aria-label="Open navigation"
             >
-              <Menu className="size-8" />
+              <Menu className="size-6" />
             </button>
 
             <div className="flex items-center gap-3">
-              <img src={Logo} alt="Mua He Xanh Online logo" className="h-10 w-10" />
-              <div className="bg-gradient-to-br from-[#2890d4] to-[#00c7d4] bg-clip-text text-3xl font-semibold tracking-[-0.04em] text-transparent md:text-[44px] md:leading-none">
+              <img
+                src={Logo}
+                alt="Mua He Xanh Online logo"
+                className="h-8 w-8"
+              />
+              <div className="bg-gradient-to-br from-[#2890d4] to-[#00c7d4] bg-clip-text text-xl font-semibold tracking-[-0.02em] text-transparent md:text-3xl md:leading-none">
                 Mua He Xanh Online
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-5 md:gap-10">
-            <nav className="hidden items-center gap-8 text-[31px] text-[#445067] md:flex md:text-base">
-              <a href="#" className="hover:text-[#1d9bf0]">Home</a>
-              <a href="#" className="hover:text-[#1d9bf0]">Campaign</a>
-              <a href="#" className="hover:text-[#1d9bf0]">About us</a>
+          <div className="flex items-center gap-4 md:gap-8">
+            <nav className="hidden items-center gap-6 text-sm text-[#445067] md:flex md:text-base">
+              <a href="#" className="hover:text-[#1d9bf0]">
+                Home
+              </a>
+              <a href="#" className="hover:text-[#1d9bf0]">
+                Campaign
+              </a>
+              <a href="#" className="hover:text-[#1d9bf0]">
+                About us
+              </a>
             </nav>
-            <Button className="h-10 rounded-xl bg-[#2196de] px-7 text-lg font-medium text-white hover:bg-[#1389d3] md:text-base">
+            <Button className="h-9 rounded-xl bg-[#2196de] px-5 text-sm font-medium text-white hover:bg-[#1389d3]">
               Logout
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 px-4 py-6 md:px-8 md:py-8">
-        <div className="mx-auto flex w-full max-w-[1100px] flex-col gap-6">
+      <main className="flex-1 px-4 py-4 md:px-6 md:py-6">
+        <div className="mx-auto flex w-full max-w-[980px] flex-col gap-5">
           <div className="flex justify-end">
-            <div className="w-full max-w-[330px] space-y-2">
-              <Label htmlFor="user-selection">USER SELECTION</Label>
+            <div className="w-full max-w-[300px] space-y-2">
+              <Label
+                htmlFor="user-selection"
+                className="text-xs tracking-[0.08em] text-[#5f6675]"
+              >
+                USER SELECTION
+              </Label>
               <div className="relative w-full">
                 <select
                   id="user-selection"
-                      value={roleFilter}
-                      onChange={(event) => setRoleFilter(event.target.value)}
-                  className="h-12 w-full appearance-none rounded-md border-0 bg-[#e8ebf0] px-4 text-xl text-[#222733] md:text-2xl"
+                  value={roleFilter}
+                  onChange={(event) => setRoleFilter(event.target.value)}
+                  className="h-10 w-full appearance-none rounded-md border-0 bg-[#e8ebf0] px-3 text-sm text-[#222733] md:text-base"
                 >
-                      {roleOptions.map((option) => (
+                  {roleOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-6 -translate-y-1/2 text-[#2f3541]" />
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-[#2f3541]" />
               </div>
             </div>
           </div>
 
-          <section className="rounded-lg border border-[#d1d7e1] bg-[#f4f5f8] px-5 py-7 md:px-14 md:py-8">
-            <h2 className="text-3xl font-semibold text-[#1d74d2] md:text-[36px]">
+          <section className="rounded-lg border border-[#d1d7e1] bg-[#f4f5f8] px-4 py-5 md:px-8 md:py-6">
+            <h2 className="text-xl font-semibold text-[#1d74d2] md:text-2xl">
               NEW REQUESTS ({filteredUsers.length})
             </h2>
 
-            <div className="mt-6 overflow-hidden rounded-xl border border-[#8f98ad] bg-white">
+            <div className="mt-4 overflow-x-auto rounded-xl border border-[#8f98ad] bg-white">
               <table className="w-full border-collapse">
                 <thead className="border-b border-[#8f98ad] bg-[#f8f9fc]">
                   <tr className="text-[#6e7588]">
-                    <th className="px-5 py-4 text-left text-3xl font-semibold md:text-[42px]">USER</th>
-                    <th className="px-5 py-4 text-left text-3xl font-semibold md:text-[42px]">REQUEST</th>
-                    <th className="px-5 py-4 text-left text-3xl font-semibold md:text-[42px]">STATUS</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold tracking-[0.08em] md:text-sm">
+                      USER
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold tracking-[0.08em] md:text-sm">
+                      REQUEST
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold tracking-[0.08em] md:text-sm">
+                      STATUS
+                    </th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {isLoading ? (
                     <tr>
-                      <td colSpan={3} className="px-5 py-8 text-center text-lg text-[#6e7588] md:text-2xl">
+                      <td
+                        colSpan={3}
+                        className="px-4 py-6 text-center text-sm text-[#6e7588] md:text-base"
+                      >
                         Loading pending users...
                       </td>
                     </tr>
                   ) : filteredUsers.length === 0 ? (
                     <tr>
-                      <td colSpan={3} className="px-5 py-8 text-center text-lg text-[#6e7588] md:text-2xl">
+                      <td
+                        colSpan={3}
+                        className="px-4 py-6 text-center text-sm text-[#6e7588] md:text-base"
+                      >
                         No pending users found.
                       </td>
                     </tr>
                   ) : (
                     filteredUsers.map((user: PendingUser) => (
                       <tr key={user.id} className="align-top">
-                        <td className="px-5 py-6 text-2xl text-[#10131a] md:text-[36px]">{user.username}</td>
-                        <td className="px-5 py-6 text-xl text-[#10131a] md:text-[36px] md:leading-[1.35]">
+                        <td className="px-4 py-4 text-sm font-medium text-[#10131a] md:text-base">
+                          {user.username}
+                        </td>
+                        <td className="px-4 py-4 text-sm text-[#10131a] md:text-base md:leading-[1.35]">
                           {user.fullName} ({user.email})
                         </td>
-                        <td className="px-5 py-6">
+                        <td className="px-4 py-4">
                           <button
                             type="button"
                             onClick={() => handleAcceptUser(user.id)}
                             disabled={acceptMutation.isPending}
-                            className="inline-flex items-center gap-1 rounded-full bg-[#0e4db5] px-4 py-2 text-sm font-semibold tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-70 md:px-5 md:py-3 md:text-xl"
+                            className="inline-flex items-center gap-1 rounded-full bg-[#0e4db5] px-3 py-1.5 text-xs font-semibold tracking-[0.06em] text-white disabled:cursor-not-allowed disabled:opacity-70 md:px-4 md:py-2 md:text-sm"
                           >
                             {acceptMutation.isPending ? "ACCEPTING" : "ACCEPT"}
-                            <ChevronDown className="size-4 md:size-6" />
+                            <ChevronDown className="size-3.5 md:size-4" />
                           </button>
                         </td>
                       </tr>

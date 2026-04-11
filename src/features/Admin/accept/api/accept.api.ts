@@ -1,4 +1,4 @@
-import axiosClient from "@/shared/api";
+import axiosClient, { globalConfig } from "@/shared/api";
 
 const PENDING_USERS_ENDPOINT = "/admin/users/pending";
 
@@ -52,12 +52,16 @@ const toPendingUser = (user: PendingUserResponse): PendingUser => {
 };
 
 const getPendingUsersApi = async (): Promise<PendingUser[]> => {
-  const response = await axiosClient.get<PendingUserResponse[]>(PENDING_USERS_ENDPOINT);
+  const response = await axiosClient.get<PendingUserResponse[]>(
+    `${globalConfig}${PENDING_USERS_ENDPOINT}`,
+  );
   return response.data.map(toPendingUser);
 };
 
 const acceptPendingUserApi = async (userId: number): Promise<PendingUser> => {
-  const response = await axiosClient.patch<PendingUserResponse>(`/admin/users/${userId}/accept`);
+  const response = await axiosClient.patch<PendingUserResponse>(
+    `${globalConfig}/admin/users/${userId}/accept`,
+  );
   return toPendingUser(response.data);
 };
 

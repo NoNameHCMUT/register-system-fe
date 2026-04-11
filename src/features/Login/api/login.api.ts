@@ -1,6 +1,6 @@
 import axiosClient, { globalConfig } from "@/shared/api";
 
-const LOGIN_ENDPOINT = "auth/login";
+const LOGIN_ENDPOINT = "/auth/login";
 
 interface LoginPayload {
   username: string;

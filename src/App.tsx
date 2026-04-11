@@ -4,6 +4,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AcceptPage } from "./features/Admin/accept/accept-page";
 import { LoginPage } from "./features/Login/login-page";
 import { queryClient } from "./shared/query-client";
+import RegisterPage from "./features/Register/Register";
 
 function App() {
   return (
@@ -25,6 +26,8 @@ function App() {
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/admin/accept" element={<AcceptPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
