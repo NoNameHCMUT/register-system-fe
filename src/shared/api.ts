@@ -62,15 +62,15 @@ export const handleApiError = (error: unknown) => {
 axiosClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const accessToken = localStorage.getItem("accessToken");
-    const refreshToken = localStorage.getItem("refreshToken");
+    // const refreshToken = localStorage.getItem("refreshToken");
 
     if (accessToken) {
       config.headers.set("Authorization", `Bearer ${accessToken}`);
     }
 
-    if (refreshToken) {
-      config.headers.set("Authorization", `Bearer ${refreshToken}`);
-    }
+    // if (refreshToken) {
+    //   config.headers.set("Authorization", `Bearer ${refreshToken}`);
+    // }
 
     if (config.data && !(config.data instanceof FormData)) {
       config.data = toSnakeCase(config.data);

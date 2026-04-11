@@ -1,6 +1,10 @@
 import axiosClient, { globalConfig } from "@/shared/api";
 
 const PENDING_USERS_ENDPOINT = "/admin/users/pending";
+const ACCEPT_USER_ENDPOINT = (userId: number) =>
+  `/admin/users/${userId}/accept`;
+const REJECT_USER_ENDPOINT = (userId: number) =>
+  `/admin/users/${userId}/reject`;
 
 interface Affiliation {
   id: number;
@@ -59,11 +63,18 @@ const getPendingUsersApi = async (): Promise<PendingUser[]> => {
 };
 
 const acceptPendingUserApi = async (userId: number): Promise<PendingUser> => {
-  const response = await axiosClient.patch<PendingUserResponse>(
-    `${globalConfig}/admin/users/${userId}/accept`,
+  const response = await axiosClient.post<PendingUserResponse>(
+    `${globalConfig}${REJECT_USER_ENDPOINT(userId)}`,
+  );
+  return toPendingUser(response.data);
+};
+
+const rejectPendingUserApi = async (userId: number): Promise<PendingUser> => {
+  const response = await axiosClient.post<PendingUserResponse>(
+    `${globalConfig}${ACCEPT_USER_ENDPOINT(userId)}`,
   );
   return toPendingUser(response.data);
 };
 
 export type { PendingUser };
-export { acceptPendingUserApi, getPendingUsersApi };
+export { acceptPendingUserApi, getPendingUsersApi, rejectPendingUserApi };

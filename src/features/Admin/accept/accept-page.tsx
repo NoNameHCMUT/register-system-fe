@@ -6,6 +6,7 @@ import { ChevronDown, Menu } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 import { handleApiError } from "@/shared/api";
 
@@ -13,13 +14,19 @@ import {
   acceptPendingUserApi,
   getPendingUsersApi,
   type PendingUser,
+  rejectPendingUserApi,
 } from "./api/accept.api";
+import { logoutApi } from "@/features/Login/api/logout.api";
 
 const PENDING_USERS_QUERY_KEY = ["admin", "pending-users"];
 
 function AcceptPage() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [roleFilter, setRoleFilter] = useState("all");
+  const [userActions, setUserActions] = useState<
+    Record<number, "accept" | "reject">
+  >({});
 
   const { data: pendingUsers = [], isLoading } = useQuery({
     queryKey: PENDING_USERS_QUERY_KEY,
@@ -55,6 +62,17 @@ function AcceptPage() {
     },
   });
 
+  const rejectMutation = useMutation({
+    mutationFn: rejectPendingUserApi,
+    onSuccess: (user) => {
+      toast.success(`Rejected user ${user.username}.`);
+      queryClient.invalidateQueries({ queryKey: PENDING_USERS_QUERY_KEY });
+    },
+    onError: (error) => {
+      handleApiError(error);
+    },
+  });
+
   const handleAcceptUser = (userId: number) => {
     if (acceptMutation.isPending) {
       return;
@@ -62,6 +80,48 @@ function AcceptPage() {
 
     acceptMutation.mutate(userId);
   };
+
+  const handleRejectUser = (userId: number) => {
+    if (rejectMutation.isPending) {
+      return;
+    }
+
+    rejectMutation.mutate(userId);
+  };
+
+  const handleActionChange = (userId: number, action: "accept" | "reject") => {
+    setUserActions((prevActions) => ({
+      ...prevActions,
+      [userId]: action,
+    }));
+  };
+
+  const handleSubmitAction = (userId: number) => {
+    const selectedAction = userActions[userId] ?? "accept";
+
+    if (selectedAction === "reject") {
+      handleRejectUser(userId);
+      return;
+    }
+
+    handleAcceptUser(userId);
+  };
+
+  const logoutMutation = useMutation({
+    mutationFn: logoutApi,
+    onSuccess: (data) => {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      toast.success(data.message || "Logged out successfully.");
+      navigate("/login");
+    },
+    onError: (error) => {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      handleApiError(error);
+      navigate("/login");
+    },
+  });
 
   return (
     <div className="flex min-h-svh flex-col bg-[#f4f5f8] text-[#10131a]">
@@ -100,7 +160,12 @@ function AcceptPage() {
                 About us
               </a>
             </nav>
-            <Button className="h-9 rounded-xl bg-[#2196de] px-5 text-sm font-medium text-white hover:bg-[#1389d3]">
+            <Button
+              type="button"
+              onClick={() => logoutMutation.mutate()}
+              disabled={logoutMutation.isPending}
+              className="h-9 rounded-xl bg-[#2196de] px-5 text-sm font-medium text-white hover:bg-[#1389d3]"
+            >
               Logout
             </Button>
           </div>
@@ -185,15 +250,40 @@ function AcceptPage() {
                           {user.fullName} ({user.email})
                         </td>
                         <td className="px-4 py-4">
-                          <button
-                            type="button"
-                            onClick={() => handleAcceptUser(user.id)}
-                            disabled={acceptMutation.isPending}
-                            className="inline-flex items-center gap-1 rounded-full bg-[#0e4db5] px-3 py-1.5 text-xs font-semibold tracking-[0.06em] text-white disabled:cursor-not-allowed disabled:opacity-70 md:px-4 md:py-2 md:text-sm"
-                          >
-                            {acceptMutation.isPending ? "ACCEPTING" : "ACCEPT"}
-                            <ChevronDown className="size-3.5 md:size-4" />
-                          </button>
+                          <div className="flex flex-col items-stretch gap-1.5 sm:flex-row sm:items-center">
+                            <div className="w-full sm:max-w-[140px]">
+                              <select
+                                aria-label={`Select action for ${user.username}`}
+                                value={userActions[user.id] ?? "accept"}
+                                onChange={(event) =>
+                                  handleActionChange(
+                                    user.id,
+                                    event.target.value as "accept" | "reject",
+                                  )
+                                }
+                                disabled={
+                                  acceptMutation.isPending ||
+                                  rejectMutation.isPending
+                                }
+                                className="h-8 w-full rounded-full bg-[#0e4db5] px-3 text-[10px] font-semibold tracking-[0.06em] text-white disabled:cursor-not-allowed disabled:opacity-70 md:h-9 md:px-4 md:text-xs"
+                              >
+                                <option value="accept">ACCEPT</option>
+                                <option value="reject">REJECT</option>
+                              </select>
+                            </div>
+
+                            <Button
+                              type="button"
+                              onClick={() => handleSubmitAction(user.id)}
+                              disabled={
+                                acceptMutation.isPending ||
+                                rejectMutation.isPending
+                              }
+                              className="h-8 rounded-full bg-[#0a3f94] px-3 text-[10px] font-semibold tracking-[0.06em] text-white hover:bg-[#08357f] disabled:cursor-not-allowed disabled:opacity-70 md:h-9 md:px-4 md:text-xs"
+                            >
+                              Submit
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))

@@ -8,10 +8,6 @@ interface Affiliation {
   std_name: string;
 }
 
-interface AffiliationsResponse {
-  data: Affiliation[];
-}
-
 interface RegisterPayload {
   username: string;
   fullName: string;
@@ -38,10 +34,10 @@ const registerApi = async (
 };
 
 const getAffiliationsApi = async (): Promise<Affiliation[]> => {
-  const response = await axiosClient.get<AffiliationsResponse>(
+  const response = await axiosClient.get(
     `${globalConfig}${AFFILIATIONS_ENDPOINT}`,
   );
-  return response.data.data;
+  return response.data;
 };
 
 export type { Affiliation, RegisterPayload, RegisterResponse };
