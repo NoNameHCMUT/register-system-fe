@@ -1,6 +1,6 @@
 import { Toaster } from "sonner";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { LoginPage } from "./features/Login/login-page";
+import RegisterPage from "./features/Register/Register";
 
 function App() {
   return (
@@ -8,18 +8,18 @@ function App() {
       <Toaster
         richColors
         position="top-center"
-        expand={true}
-        toastOptions={{
-          style: {
-            minWidth: "360px",
-            fontSize: "16px",
-            padding: "16px",
-          },
-        }}
+        // expand={true}
+        // toastOptions={{
+        //   style: {
+        //     minWidth: "360px",
+        //     fontSize: "16px",
+        //     padding: "16px",
+        //   },
+        // }}
       />
 
       <Routes>
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/" element={<RegisterPage />} />
       </Routes>
     </BrowserRouter>
   );
