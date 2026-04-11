@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { handleApiError } from "@/shared/api";
 
@@ -19,6 +20,7 @@ import { loginApi } from "../api/login.api";
 import { isEmpty } from "../utils";
 
 function LoginForm() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -26,8 +28,8 @@ function LoginForm() {
   const loginMutation = useMutation({
     mutationFn: loginApi,
     onSuccess: (data) => {
-      const accessToken = data.accessToken;
-      const refreshToken = data.refreshToken;
+      const accessToken = data.access_token;
+      const refreshToken = data.refresh_token;
 
       if (accessToken) {
         localStorage.setItem("accessToken", accessToken);
@@ -38,6 +40,7 @@ function LoginForm() {
       }
 
       toast.success("Login successful.");
+      navigate("/");
     },
     onError: (error) => {
       handleApiError(error);
