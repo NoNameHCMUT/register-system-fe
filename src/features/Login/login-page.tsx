@@ -10,7 +10,7 @@ function LoginPage() {
         <LoginBrand />
       </header>
 
-      <main className="relative flex-1 overflow-hidden px-4 py-6 md:px-8 md:py-10">
+      <main className="relative bg-gradient-to-br from-[#2890d4] to-[#00c7d4] flex-1 overflow-hidden px-4 py-6 md:px-8 md:py-10">
         <div className="relative mx-auto flex h-full max-w-[1126px] items-center justify-center">
           <LoginForm />
         </div>

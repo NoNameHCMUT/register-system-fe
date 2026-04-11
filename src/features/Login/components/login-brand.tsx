@@ -6,8 +6,8 @@ function LoginBrand() {
       <div className="relative shrink-0">
         <img src={Logo} width={50} height={50} />
       </div>
-      <div className="text-3xl font-semibold tracking-[-0.04em] text-[#0d0f14] md:text-[34px]">
-        Mua He Xanh
+      <div className="bg-gradient-to-br from-[#2890d4] to-[#00c7d4] bg-clip-text text-3xl font-semibold tracking-[-0.04em] text-transparent md:text-[34px]">
+        Mua He Xanh Online
       </div>
     </div>
   );
