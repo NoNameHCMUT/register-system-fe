@@ -2,6 +2,7 @@ import { Toaster } from "sonner";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { LoginPage } from "./features/Login/login-page";
+import { StudentHome } from "./features/StudentHome";
 import { queryClient } from "./shared/query-client";
 
 function App() {
@@ -23,7 +24,8 @@ function App() {
 
         <Routes>
           <Route path="/" element={<LoginPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/student-home" element={<StudentHome />} />
+          <Route path="*" element={<Navigate to="/student-home" replace />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>

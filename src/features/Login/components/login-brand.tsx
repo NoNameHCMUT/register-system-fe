@@ -1,8 +1,8 @@
-import Logo from "@/assets/logo.svg";
+import Logo from "@/assets/logo.svg?url";
 
 function LoginBrand() {
   return (
-    <div className="flex items-center justify-center gap-3 pt-8 pb-6 md:pt-3 md:pb-3">
+    <div className="flex items-center justify-center gap-3 pt-8 pb-6 md:pt-3 md:pb-3">  
       <div className="relative shrink-0">
         <img src={Logo} width={50} height={50} />
       </div>
