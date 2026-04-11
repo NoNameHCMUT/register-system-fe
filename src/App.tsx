@@ -1,6 +1,7 @@
 import { Toaster } from "sonner";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { AcceptPage } from "./features/Admin/accept/accept-page";
 import { LoginPage } from "./features/Login/login-page";
 import { queryClient } from "./shared/query-client";
 
@@ -23,6 +24,7 @@ function App() {
 
         <Routes>
           <Route path="/" element={<LoginPage />} />
+          <Route path="/admin/accept" element={<AcceptPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
