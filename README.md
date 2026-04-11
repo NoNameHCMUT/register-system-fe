@@ -136,13 +136,65 @@ Defined in `package.json`:
 - **Oxc** - Modern JavaScript tooling
 - **ESLint** - Code quality and consistency
 
-## Contributing
+## Git Workflow (GitFlow)
 
-When contributing to this project, please ensure:
+This project follows a GitFlow branching strategy to maintain code quality and organization:
 
-- Code follows the ESLint standards
-- TypeScript types are properly used
-- Components are modular and reusable
+### Branch Structure
+
+- **main** - The primary production-ready branch. Direct commits to this branch are not allowed.
+- **feat/*** - Feature branches for new features (e.g., `feat/user-registration`, `feat/dashboard`)
+- **fix/*** - Bug fix branches for fixing issues (e.g., `fix/login-validation`, `fix/responsive-layout`)
+
+### Workflow Steps
+
+1. **Create a feature or fix branch from main:**
+
+   ```bash
+   # For new features
+   git checkout main
+   git pull origin main
+   git checkout -b feat/your-feature-name
+   
+   # For bug fixes
+   git checkout main
+   git pull origin main
+   git checkout -b fix/your-fix-name
+   ```
+
+2. **Make your changes** on the feature/fix branch
+
+3. **Commit your changes:**
+
+   ```bash
+   git add .
+   git commit -m "Descriptive commit message"
+   ```
+
+4. **Keep your branch updated:**
+
+   ```bash
+   git fetch -a
+   git pull origin
+   ```
+
+5. **Push your branch:**
+
+   ```bash
+   git push origin feat/your-feature-name
+   # or
+   git push origin fix/your-fix-name
+   ```
+
+6. **Create a Pull Request** for code review before merging to main
+
+### Important Rules
+
+- **DO NOT** work directly on the `main` branch
+- **DO NOT** commit directly to `main`
+- **DO** create separate branches for each feature or fix
+- **DO** use descriptive branch names
+- **DO** submit pull requests for review before merging
 
 ## License
 
