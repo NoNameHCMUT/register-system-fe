@@ -248,13 +248,18 @@ echo "Pre-commit checks completed!"
 EOF
 
 echo "pnpm commitlint --edit $1" >> .husky/commit-msg
-```
 
 ### Make Hook Files Executable
-
-```bash
 chmod +x .husky/pre-commit
 chmod +x .husky/commit-msg
+```
+
+### Commit message
+
+```bash
+git commit -m "feat: ..."
+git commit -m "fix: ..."
+git commit -m "chore: ..."
 ```
 
 ## License
