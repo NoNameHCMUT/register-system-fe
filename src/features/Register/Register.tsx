@@ -7,12 +7,13 @@ import { LoginBrand } from "../Login/components/login-brand";
 import { Eye, EyeOff } from "lucide-react";
 import { Select } from "@/components/ui/select";
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 import { handleApiError } from "@/shared/api";
 
-import { registerApi } from "./api/register.api";
+import { getAffiliationsApi, registerApi } from "./api/register.api";
 
 const roleOptions = [
   { value: "student", label: "Student" },
@@ -29,13 +30,8 @@ const schoolOptions = [
   },
 ];
 
-const cityOptions = [
-  { value: "hcm", label: "Ho Chi Minh" },
-  { value: "hn", label: "Ha Noi" },
-  { value: "hp", label: "Hai Phong" },
-];
-
 export default function RegisterPage() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordAgain, setShowPasswordAgain] = useState(false);
   const [username, setUsername] = useState("");
@@ -45,12 +41,26 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState("");
   const [school, setSchool] = useState("");
-  const [city, setCity] = useState("");
+  const [affiliation, setAffiliation] = useState("");
+
+  const affiliationsQuery = useQuery({
+    queryKey: ["affiliations"],
+    queryFn: getAffiliationsApi,
+  });
+
+  const affiliationOptions = (affiliationsQuery.data ?? []).map((item) => ({
+    value: String(item.id),
+    label: item.std_name,
+  }));
+
+  const isCommunityRole = role === "community";
+  const isSchoolRole = role === "student" || role === "representative";
 
   const registerMutation = useMutation({
     mutationFn: registerApi,
     onSuccess: (data) => {
       toast.success(data.message || "Register successful.");
+      navigate("/login");
     },
     onError: (error) => {
       handleApiError(error);
@@ -64,9 +74,7 @@ export default function RegisterPage() {
       !email.trim() ||
       !password.trim() ||
       !confirmPassword.trim() ||
-      !role ||
-      !school ||
-      !city
+      !role
     ) {
       toast.error("Please fill in all required fields.");
       return;
@@ -77,6 +85,22 @@ export default function RegisterPage() {
       return;
     }
 
+    if (isSchoolRole && !school) {
+      toast.error("Please select your school.");
+      return;
+    }
+
+    if (isCommunityRole && !affiliation) {
+      toast.error("Please select your affiliation.");
+      return;
+    }
+
+    const affiliationId = isCommunityRole ? Number(affiliation) : undefined;
+    if (isCommunityRole && Number.isNaN(affiliationId)) {
+      toast.error("Please select a valid affiliation.");
+      return;
+    }
+
     registerMutation.mutate({
       username,
       fullName,
@@ -84,8 +108,8 @@ export default function RegisterPage() {
       password,
       confirmPassword,
       role,
-      school,
-      city,
+      school: isSchoolRole ? school : undefined,
+      affiliationId,
     });
   };
 
@@ -199,39 +223,58 @@ export default function RegisterPage() {
                   <Select
                     id="role"
                     value={role}
-                    onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
-                      setRole(event.target.value)
-                    }
+                    onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
+                      const selectedRole = event.target.value;
+                      setRole(selectedRole);
+
+                      if (selectedRole === "community") {
+                        setSchool("");
+                      } else {
+                        setAffiliation("");
+                      }
+                    }}
                     options={roleOptions}
                     placeholder="Select one"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="school">School</Label>
-                  <Select
-                    id="school"
-                    value={school}
-                    onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
-                      setSchool(event.target.value)
-                    }
-                    options={schoolOptions}
-                    placeholder="Select one"
-                  />
-                </div>
+                {isSchoolRole && (
+                  <div className="space-y-2">
+                    <Label htmlFor="school">School</Label>
+                    <Select
+                      id="school"
+                      value={school}
+                      onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
+                        setSchool(event.target.value)
+                      }
+                      options={schoolOptions}
+                      placeholder="Select one"
+                    />
+                  </div>
+                )}
 
-                <div className="space-y-2">
-                  <Label htmlFor="city">City</Label>
-                  <Select
-                    id="city"
-                    value={city}
-                    onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
-                      setCity(event.target.value)
-                    }
-                    options={cityOptions}
-                    placeholder="Select one"
-                  />
-                </div>
+                {isCommunityRole && (
+                  <div className="space-y-2">
+                    <Label htmlFor="affiliation_id">Affiliation</Label>
+                    <Select
+                      id="affiliation_id"
+                      value={affiliation}
+                      disabled={
+                        affiliationsQuery.isLoading ||
+                        affiliationOptions.length === 0
+                      }
+                      onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
+                        setAffiliation(event.target.value)
+                      }
+                      options={affiliationOptions}
+                      placeholder={
+                        affiliationsQuery.isLoading
+                          ? "Loading affiliations..."
+                          : "Select one"
+                      }
+                    />
+                  </div>
+                )}
 
                 <Button
                   type="submit"
