@@ -1,0 +1,4 @@
+echo "Running TypeScript type checking..."
+pnpm tsc --noEmit
+
+echo "Pre-commit checks completed!"

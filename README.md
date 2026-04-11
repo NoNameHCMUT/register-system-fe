@@ -13,6 +13,8 @@ A modern, responsive web application for managing online registrations built wit
 - [Building for Production](#building-for-production)
 - [Project Structure](#project-structure)
 - [Available Scripts](#available-scripts)
+- [Git Workflow (GitFlow)](#git-workflow-gitflow)
+- [Pre-commit Hooks with Husky and Commitlint](#pre-commit-hooks-with-husky-and-commitlint)
 
 ## Overview
 
@@ -195,6 +197,65 @@ This project follows a GitFlow branching strategy to maintain code quality and o
 - **DO** create separate branches for each feature or fix
 - **DO** use descriptive branch names
 - **DO** submit pull requests for review before merging
+
+## Pre-commit Hooks with Husky and Commitlint
+
+This project uses [Husky](https://typicode.github.io/husky/) and [Commitlint](https://commitlint.js.org/) to enforce code quality and commit message conventions before code is committed.
+
+### Install Dependencies
+
+```bash
+pnpm i husky lint-staged
+pnpm i @commitlint/cli @commitlint/config-conventional
+```
+
+### Initialize Husky
+
+```bash
+pnpm husky init
+```
+
+### Commitlint Configuration
+
+Create a `commitlint.config.js` file in the project root:
+
+```js
+export default {
+   extends: ['@commitlint/config-conventional'],
+};
+```
+
+This configuration enforces conventional commit messages such as:
+
+```bash
+feat: add registration form
+fix: handle validation error
+chore: update dependencies
+```
+
+### Pre-commit Hook
+
+The `.husky/pre-commit` file runs the following checks before a commit is created:
+
+```bash
+pnpm husky init
+
+cat << 'EOF' > .husky/pre-commit
+echo "Running TypeScript type checking..."
+pnpm tsc --noEmit
+
+echo "Pre-commit checks completed!"
+EOF
+
+echo "pnpm commitlint --edit $1" >> .husky/commit-msg
+```
+
+### Make Hook Files Executable
+
+```bash
+chmod +x .husky/pre-commit
+chmod +x .husky/commit-msg
+```
 
 ## License
 
