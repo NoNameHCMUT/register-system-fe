@@ -2,7 +2,7 @@ import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import _ from "lodash";
 import { toast } from "sonner";
 
-const globalConfig = import.meta.env.VITE_API_URL;
+export const globalConfig = import.meta.env.VITE_API_URL;
 
 const axiosClient = axios.create({
   baseURL: globalConfig.apiUrl,
