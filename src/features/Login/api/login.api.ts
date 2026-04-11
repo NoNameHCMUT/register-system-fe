@@ -1,6 +1,6 @@
 import axiosClient, { globalConfig } from "@/shared/api";
 
-const LOGIN_ENDPOINT = "auth/login";
+const LOGIN_ENDPOINT = "/auth/login";
 
 interface LoginPayload {
   username: string;
@@ -8,8 +8,8 @@ interface LoginPayload {
 }
 
 interface LoginResponse {
-  accessToken?: string;
-  refreshToken?: string;
+  access_token?: string;
+  refresh_token?: string;
   message?: string;
 }
 
