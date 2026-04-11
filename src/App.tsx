@@ -3,6 +3,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { LoginPage } from "./features/Login/login-page";
 import { queryClient } from "./shared/query-client";
+import LogoutPage from "./features/Logout/logout-page";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         />
 
         <Routes>
+          <Route path="/logout" element={<LogoutPage />} />
           <Route path="/" element={<LoginPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
