@@ -1,8 +1,11 @@
 import axiosClient, { globalConfig } from "@/shared/api";
 
 const STUDENT_PROJECTS_ENDPOINT = "/schools/projects";
+const STUDENT_APPLICATIONS_ENDPOINT = "/students/application";
 const APPLY_STUDENT_PROJECT_ENDPOINT = (projectId: number) =>
   `/students/projects/${projectId}/apply`;
+
+type StudentApplicationStatus = "SCHOOL_PENDING" | "SCHOOL_APPROVED" | string;
 
 interface Affiliation {
   description: string;
@@ -48,7 +51,7 @@ interface StudentProjectApplication {
   id: number;
   project: StudentProject;
   projectId: number;
-  status: string;
+  status: StudentApplicationStatus;
   user: UserProfile;
   userId: number;
 }
@@ -97,7 +100,7 @@ interface StudentProjectApplicationResponse {
   id: number;
   project: StudentProjectResponse;
   project_id: number;
-  status: string;
+  status: StudentApplicationStatus;
   user: UserProfileResponse;
   user_id: number;
 }
@@ -179,10 +182,23 @@ const applyStudentProjectApi = async (
   return toStudentProjectApplication(response.data);
 };
 
+const getStudentApplicationsApi = async (): Promise<StudentProjectApplication[]> => {
+  const response = await axiosClient.get<StudentProjectApplicationResponse[]>(
+    `${globalConfig}${STUDENT_APPLICATIONS_ENDPOINT}`,
+  );
+
+  return response.data.map(toStudentProjectApplication);
+};
+
 export type {
   Affiliation,
+  StudentApplicationStatus,
   StudentProject,
   StudentProjectApplication,
   UserProfile,
 };
-export { applyStudentProjectApi, getStudentProjectsApi };
+export {
+  applyStudentProjectApi,
+  getStudentApplicationsApi,
+  getStudentProjectsApi,
+};
