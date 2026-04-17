@@ -17,7 +17,7 @@ import { getAffiliationsApi, registerApi } from "./api/register.api";
 const roleOptions = [
   { value: "student", label: "Student" },
   { value: "community", label: "Local Community" },
-  { value: "representative", label: "School Representative" },
+  { value: "school", label: "School Representative" },
 ];
 
 type RegisterFormErrors = {
