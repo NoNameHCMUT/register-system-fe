@@ -1,6 +1,6 @@
 import axiosClient, { globalConfig } from "@/shared/api";
 
-const STUDENT_PROJECTS_ENDPOINT = "/students/projects";
+const STUDENT_PROJECTS_ENDPOINT = "/schools/projects";
 const APPLY_STUDENT_PROJECT_ENDPOINT = (projectId: number) =>
   `/students/projects/${projectId}/apply`;
 
