@@ -1,10 +1,21 @@
 import { Calendar, ChevronDown } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const CAMPAIGNS_PER_PAGE = 6;
 
 type CampaignItem = {
   affiliationName: string;
+  applicationStatus?: string;
   bannerUrl?: string;
   dateApproved?: string | null;
   id: number;
@@ -16,6 +27,9 @@ type CampaignItem = {
 };
 
 type CampaignBrowserProps = {
+  actionVariant?: "default" | "approve";
+  actionButtonLabel?: string;
+  actionLoadingProjectId?: number | null;
   affiliationName?: string;
   affiliations?: string[];
   emptyText?: string;
@@ -23,11 +37,53 @@ type CampaignBrowserProps = {
   introTitle?: string;
   isLoadingAffiliation?: boolean;
   isLoadingProjects: boolean;
+  onActionClick?: (project: CampaignItem) => void;
+  headerTabs?: ReactNode;
+  onRegisterClick?: (project: CampaignItem) => void;
   projects: CampaignItem[];
+  registerButtonLabel?: string;
+  registerLoadingProjectId?: number | null;
   role?: string;
+  showStudentRegisterAction?: boolean;
   showHero?: boolean;
   showActionButton?: boolean;
 };
+
+const MOCK_CAMPAIGNS: CampaignItem[] = [
+  {
+    affiliationName: "University of Science",
+    bannerUrl: "/assets/campaigns/education_campaign_1775894477648.png",
+    dateApproved: "2026-04-01T08:00:00Z",
+    id: 9001,
+    name: "Green Campus Weekend",
+    numAttending: 65,
+    numMax: 120,
+    projectEndDay: "2026-07-14",
+    projectStartDay: "2026-07-10",
+  },
+  {
+    affiliationName: "Tech Community Center",
+    bannerUrl: "/assets/campaigns/education_campaign_1775894477648.png",
+    dateApproved: null,
+    id: 9002,
+    name: "Digital Literacy For Seniors",
+    numAttending: 22,
+    numMax: 80,
+    projectEndDay: "2026-08-03",
+    projectStartDay: "2026-08-01",
+  },
+  {
+    affiliationName: "City Youth Union",
+    bannerUrl: "/assets/campaigns/education_campaign_1775894477648.png",
+    dateApproved: "2026-04-05T09:30:00Z",
+    id: 9003,
+    name: "Summer Reading Caravan",
+    numAttending: 48,
+    numMax: 60,
+    projectEndDay: "2026-06-25",
+    projectStartDay: "2026-06-20",
+  },
+];
 
 const formatDate = (value: string) => {
   const parsedDate = new Date(value);
@@ -39,7 +95,21 @@ const formatDate = (value: string) => {
   return parsedDate.toLocaleDateString("en-GB");
 };
 
+const toDateOnly = (value: string) => {
+  const datePart = value.slice(0, 10);
+  const parsedDate = new Date(datePart);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return null;
+  }
+
+  return datePart;
+};
+
 function CampaignBrowser({
+  actionVariant = "default",
+  actionButtonLabel = "View Details",
+  actionLoadingProjectId,
   affiliationName,
   affiliations,
   emptyText = "No projects found.",
@@ -47,20 +117,37 @@ function CampaignBrowser({
   introTitle,
   isLoadingAffiliation,
   isLoadingProjects,
+  onActionClick,
+  headerTabs,
+  onRegisterClick,
   projects,
+  registerButtonLabel = "Register",
+  registerLoadingProjectId,
   role,
+  showStudentRegisterAction = true,
   showHero = true,
   showActionButton = true,
 }: CampaignBrowserProps) {
   const [searchValue, setSearchValue] = useState("");
   const [appliedSearchValue, setAppliedSearchValue] = useState("");
   const [selectedAffiliation, setSelectedAffiliation] = useState("all");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [appliedStartDate, setAppliedStartDate] = useState("");
+  const [appliedEndDate, setAppliedEndDate] = useState("");
+  const [dateRangeError, setDateRangeError] = useState("");
   const [selectedApprovalTab, setSelectedApprovalTab] = useState<
     "pending" | "approved"
   >("approved");
   const [currentPage, setCurrentPage] = useState(1);
+  const [confirmRegisterProject, setConfirmRegisterProject] =
+    useState<CampaignItem | null>(null);
 
-  const canUseApprovalTabs = role === "admin" || role === "school";
+  const canUseApprovalTabs =
+    role === "admin" || role === "school" || role === "community";
+  const isStudentRole = role === "student";
+  const isApproveAction = actionVariant === "approve";
+  const sourceProjects = projects.length > 0 ? projects : MOCK_CAMPAIGNS;
 
   const availableAffiliations = useMemo(() => {
     if (affiliations && affiliations.length > 0) {
@@ -68,14 +155,16 @@ function CampaignBrowser({
     }
 
     return Array.from(
-      new Set(projects.map((project) => project.affiliationName)),
+      new Set(sourceProjects.map((project) => project.affiliationName)),
     ).sort((first, second) => first.localeCompare(second));
-  }, [affiliations, projects]);
+  }, [affiliations, sourceProjects]);
 
   const filteredProjects = useMemo(() => {
     const keyword = appliedSearchValue.trim().toLowerCase();
+    const normalizedAppliedStartDate = appliedStartDate || null;
+    const normalizedAppliedEndDate = appliedEndDate || null;
 
-    return projects.filter((project) => {
+    return sourceProjects.filter((project) => {
       const matchesKeyword =
         !keyword ||
         project.name.toLowerCase().includes(keyword) ||
@@ -85,23 +174,58 @@ function CampaignBrowser({
         selectedAffiliation === "all" ||
         project.affiliationName === selectedAffiliation;
 
-      return matchesKeyword && matchesAffiliation;
+      const normalizedProjectStartDate = toDateOnly(project.projectStartDay);
+      const normalizedProjectEndDate = toDateOnly(project.projectEndDay);
+
+      const matchesStartDate =
+        !normalizedAppliedStartDate ||
+        (normalizedProjectEndDate !== null &&
+          normalizedProjectEndDate >= normalizedAppliedStartDate);
+
+      const matchesEndDate =
+        !normalizedAppliedEndDate ||
+        (normalizedProjectStartDate !== null &&
+          normalizedProjectStartDate <= normalizedAppliedEndDate);
+
+      return (
+        matchesKeyword &&
+        matchesAffiliation &&
+        matchesStartDate &&
+        matchesEndDate
+      );
     });
-  }, [appliedSearchValue, projects, selectedAffiliation]);
+  }, [
+    appliedEndDate,
+    appliedSearchValue,
+    appliedStartDate,
+    selectedAffiliation,
+    sourceProjects,
+  ]);
 
   const displayProjects = useMemo(() => {
-    if (!canUseApprovalTabs) {
-      return filteredProjects;
+    if (canUseApprovalTabs) {
+      return filteredProjects.filter((project) => {
+        if (selectedApprovalTab === "pending") {
+          return !project.dateApproved;
+        }
+
+        return Boolean(project.dateApproved);
+      });
     }
 
-    return filteredProjects.filter((project) => {
-      if (selectedApprovalTab === "pending") {
-        return !project.dateApproved;
-      }
+    if (isStudentRole) {
+      return filteredProjects.filter((project) =>
+        Boolean(project.dateApproved),
+      );
+    }
 
-      return Boolean(project.dateApproved);
-    });
-  }, [canUseApprovalTabs, filteredProjects, selectedApprovalTab]);
+    return filteredProjects;
+  }, [
+    canUseApprovalTabs,
+    filteredProjects,
+    isStudentRole,
+    selectedApprovalTab,
+  ]);
 
   const totalPages = Math.max(
     1,
@@ -115,8 +239,29 @@ function CampaignBrowser({
   }, [displayProjects, safeCurrentPage]);
 
   const onApplyFilters = () => {
+    if (startDate && endDate && startDate > endDate) {
+      setDateRangeError("End date must be later than or equal to start date.");
+      return;
+    }
+
+    setDateRangeError("");
     setAppliedSearchValue(searchValue);
+    setAppliedStartDate(startDate);
+    setAppliedEndDate(endDate);
     setCurrentPage(1);
+  };
+
+  const onOpenRegisterDialog = (project: CampaignItem) => {
+    setConfirmRegisterProject(project);
+  };
+
+  const onConfirmRegister = () => {
+    if (!confirmRegisterProject) {
+      return;
+    }
+
+    onRegisterClick?.(confirmRegisterProject);
+    setConfirmRegisterProject(null);
   };
 
   return (
@@ -187,7 +332,7 @@ function CampaignBrowser({
               <label className="block text-[10px] font-semibold uppercase tracking-[0.06em] text-[#0f4ec6]">
                 Affiliation
               </label>
-              {role === "student" ? (
+              {role !== "admin" ? (
                 <div className="flex h-11 w-full items-center rounded-xl border border-transparent bg-[#f8f9fb] px-4 text-sm font-bold text-[#4f5b70]">
                   {isLoadingAffiliation
                     ? "Loading affiliation..."
@@ -225,6 +370,20 @@ function CampaignBrowser({
               </label>
               <input
                 type="date"
+                value={startDate}
+                onChange={(event) => {
+                  const nextStartDate = event.target.value;
+                  setStartDate(nextStartDate);
+
+                  if (endDate && nextStartDate && nextStartDate > endDate) {
+                    setDateRangeError(
+                      "End date must be later than or equal to start date.",
+                    );
+                    return;
+                  }
+
+                  setDateRangeError("");
+                }}
                 className="h-11 w-full rounded-xl border border-transparent bg-[#f8f9fb] px-4 text-sm text-[#2e3a50] focus:outline-none focus:ring-2 focus:ring-[#0f4ec6]/20"
               />
             </div>
@@ -239,6 +398,20 @@ function CampaignBrowser({
               </label>
               <input
                 type="date"
+                value={endDate}
+                onChange={(event) => {
+                  const nextEndDate = event.target.value;
+                  setEndDate(nextEndDate);
+
+                  if (startDate && nextEndDate && startDate > nextEndDate) {
+                    setDateRangeError(
+                      "End date must be later than or equal to start date.",
+                    );
+                    return;
+                  }
+
+                  setDateRangeError("");
+                }}
                 className="h-11 w-full rounded-xl border border-transparent bg-[#f8f9fb] px-4 text-sm text-[#2e3a50] focus:outline-none focus:ring-2 focus:ring-[#0f4ec6]/20"
               />
             </div>
@@ -251,6 +424,12 @@ function CampaignBrowser({
               Filter
             </button>
           </div>
+
+          {dateRangeError && (
+            <p className="mt-12 text-xs font-medium text-red-600">
+              {dateRangeError}
+            </p>
+          )}
         </div>
       </section>
 
@@ -292,6 +471,8 @@ function CampaignBrowser({
                 </button>
               </div>
             )}
+
+            {headerTabs}
           </div>
           <p className="text-sm font-medium text-[#667186]">
             {displayProjects.length} campaign
@@ -300,7 +481,7 @@ function CampaignBrowser({
         </div>
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {isLoadingProjects ? (
+          {isLoadingProjects && projects.length > 0 ? (
             <p className="col-span-full text-sm text-[#667186]">
               Loading projects...
             </p>
@@ -366,12 +547,45 @@ function CampaignBrowser({
                       </div>
 
                       {showActionButton && (
-                        <button
-                          type="button"
-                          className="h-11 w-full rounded-xl bg-[#eceff4] text-sm font-semibold text-[#0f4ec6] transition-colors hover:bg-[#dfe4ec]"
+                        <div
+                          className={
+                            isStudentRole && showStudentRegisterAction
+                              ? "grid grid-cols-2 gap-2"
+                              : "grid grid-cols-1"
+                          }
                         >
-                          View Details
-                        </button>
+                          <button
+                            type="button"
+                            onClick={() => onActionClick?.(project)}
+                            disabled={
+                              isApproveAction &&
+                              (actionLoadingProjectId === project.id ||
+                                Boolean(project.dateApproved))
+                            }
+                            className="h-11 w-full cursor-pointer rounded-xl bg-[#eceff4] text-sm font-semibold text-[#0f4ec6] transition-colors hover:bg-[#dfe4ec] disabled:cursor-not-allowed disabled:bg-[#e5e8ee] disabled:text-[#7a8497]"
+                          >
+                            {isApproveAction
+                              ? project.dateApproved
+                                ? "Approved"
+                                : actionLoadingProjectId === project.id
+                                  ? "Approving..."
+                                  : actionButtonLabel
+                              : actionButtonLabel}
+                          </button>
+
+                          {isStudentRole && showStudentRegisterAction && (
+                            <button
+                              type="button"
+                              onClick={() => onOpenRegisterDialog(project)}
+                              disabled={registerLoadingProjectId === project.id}
+                              className="h-11 w-full cursor-pointer rounded-xl bg-[#2b50da] text-sm font-semibold text-white transition-colors hover:bg-[#2345c4] disabled:cursor-not-allowed disabled:opacity-70"
+                            >
+                              {registerLoadingProjectId === project.id
+                                ? "Registering..."
+                                : registerButtonLabel}
+                            </button>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
@@ -422,6 +636,32 @@ function CampaignBrowser({
           </div>
         )}
       </main>
+
+      <AlertDialog
+        open={Boolean(confirmRegisterProject)}
+        onOpenChange={(isOpen: boolean) => {
+          if (!isOpen) {
+            setConfirmRegisterProject(null);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm registration</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmRegisterProject
+                ? `Do you want to register for "${confirmRegisterProject.name}"?`
+                : "Do you want to register for this campaign?"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={onConfirmRegister} className="cursor-pointer">
+              Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

@@ -2,6 +2,7 @@ import { Toaster } from "sonner";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AcceptPage } from "./features/Admin/accept/accept-page";
+import { CommunityHome } from "./features/Community/CommunityHome";
 import { LoginPage } from "./features/Login/login-page";
 import { queryClient } from "./shared/query-client";
 import LogoutPage from "./features/Logout/logout-page";
@@ -28,6 +29,14 @@ function App() {
         <Routes>
           <Route path="/logout" element={<LogoutPage />} />
           <Route path="/" element={<ProtectedRoute />} />
+          <Route
+            path="/community/campaigns"
+            element={
+              <ProtectedRoute>
+                <CommunityHome />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/admin/accept" element={<AcceptPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />

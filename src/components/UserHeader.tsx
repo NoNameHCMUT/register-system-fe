@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { User } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 
 import { LoginBrand } from "@/features/Login/components/login-brand";
 
@@ -9,20 +10,38 @@ type UserHeaderProps = {
   onLogout?: () => void;
 };
 
-const getNavItemsByRole = (role?: string) => {
+type NavItem = {
+  label: string;
+  to?: string;
+};
+
+const getNavItemsByRole = (role?: string): NavItem[] => {
   if (role === "admin") {
-    return ["Campaigns", "List Users", "List Affiliations", "My Profile"];
+    return [
+      { label: "Campaigns", to: "/admin/home" },
+      { label: "List Users" },
+      { label: "List Affiliations" },
+      { label: "My Profile" },
+    ];
   }
 
   if (role === "community") {
-    return ["Dashboard", "My Campaigns", "My Profile"];
+    return [
+      { label: "Dashboard", to: "/" },
+      { label: "My Campaigns", to: "/community/campaigns" },
+      { label: "My Profile" },
+    ];
   }
 
-  return ["Campaigns", "My Profile"];
+  return [
+    { label: "Campaigns", to: "/" },
+    { label: "My Profile" },
+  ];
 };
 
 function UserHeader({ isPublic = false, role, onLogout }: UserHeaderProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const location = useLocation();
   const navItems = getNavItemsByRole(role);
 
   if (isPublic) {
@@ -43,19 +62,32 @@ function UserHeader({ isPublic = false, role, onLogout }: UserHeaderProps) {
         </div>
 
         <nav className="absolute bottom-0 left-1/2 top-0 hidden -translate-x-1/2 space-x-8 md:flex">
-          {navItems.map((item, index) => (
-            <a
-              key={item}
-              href="#"
-              className={`flex h-full items-center border-b-2 px-2 font-semibold ${
-                index === 0
-                  ? "border-[#2890d4] text-[#2890d4]"
-                  : "border-transparent text-[#2890d4]"
-              }`}
-            >
-              {item}
-            </a>
-          ))}
+          {navItems.map((item, index) => {
+            const isActive = item.to
+              ? location.pathname === item.to ||
+                (item.to === "/" && location.pathname === "/")
+              : false;
+
+            const className = `flex h-full items-center border-b-2 px-2 font-semibold ${
+              isActive || (!item.to && index === 0)
+                ? "border-[#2890d4] text-[#2890d4]"
+                : "border-transparent text-[#2890d4]"
+            }`;
+
+            if (!item.to) {
+              return (
+                <span key={item.label} className={className}>
+                  {item.label}
+                </span>
+              );
+            }
+
+            return (
+              <Link key={item.label} to={item.to} className={className}>
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="flex items-center gap-3 text-[#3f4b5f]">
