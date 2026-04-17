@@ -2,6 +2,7 @@ import { Toaster } from "sonner";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AcceptPage } from "./features/Admin/accept/accept-page";
+import { AffiliationsPage } from "./features/Admin/affiliations/affiliations-page";
 import { CommunityHome } from "./features/Community/CommunityHome";
 import { LoginPage } from "./features/Login/login-page";
 import { queryClient } from "./shared/query-client";
@@ -34,6 +35,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <CommunityHome />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/affiliations"
+            element={
+              <ProtectedRoute>
+                <AffiliationsPage />
               </ProtectedRoute>
             }
           />
