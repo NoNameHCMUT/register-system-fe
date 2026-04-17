@@ -93,17 +93,17 @@ function LoginForm() {
   };
 
   return (
-    <Card className="w-full max-w-[500px] border-[#edf0f5] px-6 py-8 md:px-10 md:py-10">
+    <Card className="w-full max-w-[440px] border-[#edf0f5] px-5 py-6 md:px-8 md:py-8">
       <CardHeader className="gap-3">
-        <CardTitle>Welcome back</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-2xl">Welcome back</CardTitle>
+        <CardDescription className="text-xs">
           Enter your credentials to access the volunteer portal.
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="pt-7">
+      <CardContent className="pt-5">
         <form
-          className="space-y-5"
+          className="space-y-4"
           onSubmit={(event) => {
             event.preventDefault();
             handleSubmit();
@@ -118,7 +118,7 @@ function LoginForm() {
                 value={username}
                 onChange={(event) => setUsername(event.target.value)}
                 placeholder="Enter your username"
-                className="h-[60px] rounded-2xl border-0 bg-[#f3f4f7] pl-12 text-[15px] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] placeholder:text-[#8b97ae]"
+                className="h-[52px] rounded-2xl border-0 bg-[#f3f4f7] pl-12 text-[14px] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] placeholder:text-[#8b97ae]"
               />
             </div>
           </div>
@@ -133,7 +133,7 @@ function LoginForm() {
                 onChange={(event) => setPassword(event.target.value)}
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
-                className="h-[60px] rounded-2xl border-0 bg-[#f3f4f7] pl-12 pr-12 text-[15px] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] placeholder:text-[#8b97ae]"
+                className="h-[52px] rounded-2xl border-0 bg-[#f3f4f7] pl-12 pr-12 text-[14px] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] placeholder:text-[#8b97ae]"
               />
               <button
                 type="button"
@@ -150,18 +150,9 @@ function LoginForm() {
             </div>
           </div>
 
-          <div className="flex justify-end">
-            <button
-              type="button"
-              className="text-[15px] font-medium text-[#1d9bf0] hover:underline"
-            >
-              Forgot Password?
-            </button>
-          </div>
-
           <Button
             type="submit"
-            className="h-14 w-full rounded-xl cursor-pointer bg-[#23a0ea] text-[16px] font-medium text-white hover:bg-[#1893df]"
+            className="h-12 w-full cursor-pointer rounded-xl bg-[#23a0ea] text-[15px] font-medium text-white hover:bg-[#1893df]"
           >
             {loginMutation.isPending ? "Logging in..." : "Login"}
           </Button>

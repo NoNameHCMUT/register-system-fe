@@ -45,7 +45,7 @@ export function CommunityStats() {
       />
 
       {/* Promo Card */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#4facfe] to-[#0056A0] p-8 text-white shadow-lg">
+      <div className="relative overflow-hidden rounded-2xl bg-[#2890d4] p-8 text-white shadow-lg">
         <div className="relative z-10">
           <div className="mb-4 flex size-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
             <Heart className="fill-white" />

@@ -4,8 +4,9 @@ import { User } from "lucide-react";
 import { LoginBrand } from "@/features/Login/components/login-brand";
 
 type UserHeaderProps = {
+  isPublic?: boolean;
   role?: string;
-  onLogout: () => void;
+  onLogout?: () => void;
 };
 
 const getNavItemsByRole = (role?: string) => {
@@ -20,9 +21,19 @@ const getNavItemsByRole = (role?: string) => {
   return ["Campaigns", "My Profile"];
 };
 
-function UserHeader({ role, onLogout }: UserHeaderProps) {
+function UserHeader({ isPublic = false, role, onLogout }: UserHeaderProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navItems = getNavItemsByRole(role);
+
+  if (isPublic) {
+    return (
+      <header className="border-b border-[#e6eaf0] bg-white/90 backdrop-blur-sm">
+        <div className="mx-auto flex w-full items-center justify-center">
+          <LoginBrand />
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="sticky top-0 z-50 h-[72px] border-b border-[#e6eaf0] bg-white">
@@ -65,11 +76,11 @@ function UserHeader({ role, onLogout }: UserHeaderProps) {
                 ></div>
                 <div className="absolute right-0 z-50 mt-2 w-48 rounded-md border border-[#d8dde6] bg-white py-1 shadow-lg">
                   <div className="border-b border-[#edf1f6] px-4 py-2 text-sm font-medium text-[#3c4658]">
-                    {role !== "admin"
-                      ? role === "community"
+                    {role === "admin"
+                      ? "Admin Account"
+                      : role === "community"
                         ? "Community Account"
-                        : "Admin Account"
-                      : "User Account"}
+                        : "User Account"}
                   </div>
                 </div>
               </>
@@ -80,6 +91,7 @@ function UserHeader({ role, onLogout }: UserHeaderProps) {
             type="button"
             onClick={onLogout}
             className="hidden cursor-pointer rounded-xl bg-[#0f4ec6] px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#0b3ea0] md:block"
+            disabled={!onLogout}
           >
             Logout
           </button>

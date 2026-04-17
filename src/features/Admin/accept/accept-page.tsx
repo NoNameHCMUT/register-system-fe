@@ -132,7 +132,7 @@ function AcceptPage() {
                 alt="Mua He Xanh Online logo"
                 className="h-8 w-8"
               />
-              <div className="bg-gradient-to-br from-[#2890d4] to-[#00c7d4] bg-clip-text text-xl font-semibold tracking-[-0.02em] text-transparent md:text-3xl md:leading-none">
+              <div className="bg-[#2890d4] bg-clip-text text-xl font-semibold tracking-[-0.02em] text-transparent md:text-3xl md:leading-none">
                 Mua He Xanh Online
               </div>
             </div>

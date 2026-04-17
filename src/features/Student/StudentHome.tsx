@@ -64,7 +64,7 @@ export function StudentHome() {
     <div className="flex min-h-svh flex-col bg-[#f7f9fc]">
       <UserHeader role={me?.role} onLogout={onLogout} />
 
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#2890d4] to-[#00c7d4] px-4 py-12 text-white">
+      <section className="relative overflow-hidden bg-[#2890d4] px-4 py-12 text-white">
         <div className="mx-auto w-full max-w-[860px] text-center">
           <h1 className="text-[38px] font-extrabold leading-[1.08] tracking-[-0.03em] text-white md:text-[56px]">
             Ignite Change,

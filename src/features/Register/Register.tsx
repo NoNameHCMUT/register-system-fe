@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Footer } from "@/components/Footer";
-import { LoginBrand } from "../Login/components/login-brand";
+import { UserHeader } from "@/components/UserHeader";
 import { Eye, EyeOff } from "lucide-react";
 import { Select } from "@/components/ui/select";
 import { useState } from "react";
@@ -141,21 +141,19 @@ export default function RegisterPage() {
 
   return (
     <div className="flex min-h-svh flex-col bg-white text-[#10131a]">
-      <header className="border-b border-[#e6eaf0] bg-white/90 backdrop-blur-sm">
-        <LoginBrand />
-      </header>
+      <UserHeader isPublic />
 
-      <main className="relative flex-1 overflow-hidden bg-gradient-to-br from-[#2890d4] to-[#00c7d4] px-4 py-6 md:px-8 md:py-10">
-        <div className="relative mx-auto flex h-full w-full max-w-[1126px] items-center justify-center">
-          <Card className="w-full max-w-[580px] border-none p-4 shadow-sm md:p-8">
-            <CardHeader className="space-y-1 px-0 pb-8 text-left">
-              <CardTitle className="text-[32px] font-bold">
+      <main className="relative flex-1 overflow-hidden bg-[#2890d4] px-4 py-8 md:px-6 md:py-10">
+        <div className="relative mx-auto flex h-full w-full max-w-[900px] items-center justify-center">
+          <Card className="w-full max-w-[460px] border-[#edf0f5] px-5 py-6 shadow-sm md:px-8 md:py-8">
+            <CardHeader className="space-y-1 px-0 pb-5 text-left">
+              <CardTitle className="text-2xl font-bold">
                 Create account
               </CardTitle>
             </CardHeader>
             <CardContent className="px-0">
               <form
-                className="space-y-6"
+                className="space-y-4"
                 onSubmit={(event) => {
                   event.preventDefault();
                   handleSubmit();
@@ -339,7 +337,7 @@ export default function RegisterPage() {
                 <Button
                   type="submit"
                   disabled={registerMutation.isPending}
-                  className="w-full h-12 rounded-xl bg-[#1d9bf0] text-[16px] font-semibold hover:bg-[#1a8cd8]"
+                  className="w-full cursor-pointer h-12 rounded-xl bg-[#1d9bf0] text-[16px] font-semibold hover:bg-[#1a8cd8]"
                 >
                   {registerMutation.isPending ? "Signing up..." : "Sign up"}
                 </Button>
