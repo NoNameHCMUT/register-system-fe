@@ -18,9 +18,9 @@ type NavItem = {
 const getNavItemsByRole = (role?: string): NavItem[] => {
   if (role === "admin") {
     return [
-      { label: "Campaigns", to: "/admin/home" },
+      { label: "Campaigns", to: "/" },
       { label: "List Users" },
-      { label: "List Affiliations" },
+      { label: "List Affiliations", to: "/admin/affiliations" },
       { label: "My Profile" },
     ];
   }
