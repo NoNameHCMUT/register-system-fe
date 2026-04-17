@@ -16,7 +16,7 @@ import {
   type PendingUser,
   rejectPendingUserApi,
 } from "./api/accept.api";
-import { logoutApi } from "@/features/Login/api/logout.api";
+import { handleLogout } from "@/features/Login/api/logout.api";
 
 const PENDING_USERS_QUERY_KEY = ["admin", "pending-users"];
 
@@ -107,21 +107,11 @@ function AcceptPage() {
     handleAcceptUser(userId);
   };
 
-  const logoutMutation = useMutation({
-    mutationFn: logoutApi,
-    onSuccess: (data) => {
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      toast.success(data.message || "Logged out successfully.");
-      navigate("/login");
-    },
-    onError: (error) => {
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      handleApiError(error);
-      navigate("/login");
-    },
-  });
+  const onLogout = () => {
+    handleLogout();
+    toast.success("Logged out successfully.");
+    navigate("/logout");
+  };
 
   return (
     <div className="flex min-h-svh flex-col bg-[#f4f5f8] text-[#10131a]">
@@ -162,8 +152,7 @@ function AcceptPage() {
             </nav>
             <Button
               type="button"
-              onClick={() => logoutMutation.mutate()}
-              disabled={logoutMutation.isPending}
+              onClick={onLogout}
               className="h-9 rounded-xl bg-[#2196de] px-5 text-sm font-medium text-white hover:bg-[#1389d3]"
             >
               Logout
@@ -213,7 +202,7 @@ function AcceptPage() {
                       USER
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold tracking-[0.08em] md:text-sm">
-                      REQUEST
+                      AFFILIATION
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold tracking-[0.08em] md:text-sm">
                       STATUS
@@ -247,7 +236,7 @@ function AcceptPage() {
                           {user.username}
                         </td>
                         <td className="px-4 py-4 text-sm text-[#10131a] md:text-base md:leading-[1.35]">
-                          {user.fullName} ({user.email})
+                          {user.affiliation.stdName}
                         </td>
                         <td className="px-4 py-4">
                           <div className="flex flex-col items-stretch gap-1.5 sm:flex-row sm:items-center">
@@ -265,7 +254,7 @@ function AcceptPage() {
                                   acceptMutation.isPending ||
                                   rejectMutation.isPending
                                 }
-                                className="h-8 w-full rounded-full bg-[#0e4db5] px-3 text-[10px] font-semibold tracking-[0.06em] text-white disabled:cursor-not-allowed disabled:opacity-70 md:h-9 md:px-4 md:text-xs"
+                                className="h-8 w-full rounded-full bg-[#0e4db5] px-3 text-[8px] font-semibold tracking-[0.06em] text-white disabled:cursor-not-allowed disabled:opacity-70 md:h-9 md:px-4 md:text-xs"
                               >
                                 <option value="accept">ACCEPT</option>
                                 <option value="reject">REJECT</option>

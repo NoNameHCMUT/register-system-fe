@@ -4,8 +4,9 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AcceptPage } from "./features/Admin/accept/accept-page";
 import { LoginPage } from "./features/Login/login-page";
 import { queryClient } from "./shared/query-client";
+import LogoutPage from "./features/Logout/logout-page";
 import RegisterPage from "./features/Register/Register";
-import CommunityDashboard from "./features/Community/Dashboard/cDashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -25,11 +26,11 @@ function App() {
         />
 
         <Routes>
-          <Route path="/" element={<LoginPage />} />
+          <Route path="/logout" element={<LogoutPage />} />
+          <Route path="/" element={<ProtectedRoute />} />
           <Route path="/admin/accept" element={<AcceptPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/community/home" element={<CommunityDashboard />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

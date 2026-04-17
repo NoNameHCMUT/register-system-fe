@@ -18,18 +18,40 @@ import { Label } from "@/components/ui/label";
 
 import { loginApi } from "../api/login.api";
 import { isEmpty } from "../utils";
+import { useGetUser } from "@/shared/get-user";
+
+type LoginSuccessPayload = {
+  access_token?: string;
+  refresh_token?: string;
+};
+
+type WrappedLoginSuccessPayload = {
+  data: LoginSuccessPayload;
+};
+
+const unwrapLoginResponse = (
+  payload: LoginSuccessPayload | WrappedLoginSuccessPayload,
+): LoginSuccessPayload => {
+  if (typeof payload === "object" && payload !== null && "data" in payload) {
+    return (payload as WrappedLoginSuccessPayload).data;
+  }
+
+  return payload as LoginSuccessPayload;
+};
 
 function LoginForm() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const { refetch: refetchMe } = useGetUser(false);
 
   const loginMutation = useMutation({
     mutationFn: loginApi,
-    onSuccess: (data) => {
-      const accessToken = data.access_token;
-      const refreshToken = data.refresh_token;
+    onSuccess: async (data) => {
+      const loginData = unwrapLoginResponse(data);
+      const accessToken = loginData.access_token;
+      const refreshToken = loginData.refresh_token;
 
       if (accessToken) {
         localStorage.setItem("accessToken", accessToken);
@@ -40,7 +62,21 @@ function LoginForm() {
       }
 
       toast.success("Login successful.");
-      navigate("/");
+
+      try {
+        const meResult = await refetchMe();
+        const me = meResult.data;
+
+        if (me?.role === "admin") {
+          navigate("/admin/accept");
+          return;
+        }
+
+        navigate("/");
+      } catch (error) {
+        handleApiError(error);
+        navigate("/");
+      }
     },
     onError: (error) => {
       handleApiError(error);
@@ -134,6 +170,7 @@ function LoginForm() {
             Don&apos;t have an account?{" "}
             <button
               type="button"
+              onClick={() => navigate("/register")}
               className="font-semibold text-[#1d9bf0] hover:underline"
             >
               Sign up
