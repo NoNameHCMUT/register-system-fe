@@ -2,7 +2,7 @@ interface LogoutResponse {
   message?: string;
 }
 
-const logoutApi = async (): Promise<LogoutResponse> => {
+export const handleLogout = () => {
   localStorage.removeItem("accessToken");
   localStorage.removeItem("refreshToken");
 
@@ -10,4 +10,3 @@ const logoutApi = async (): Promise<LogoutResponse> => {
 };
 
 export type { LogoutResponse };
-export { logoutApi };

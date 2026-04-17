@@ -16,7 +16,7 @@ import {
   type PendingUser,
   rejectPendingUserApi,
 } from "./api/accept.api";
-import { logoutApi } from "@/features/Login/api/logout.api";
+import { handleLogout } from "@/features/Login/api/logout.api";
 
 const PENDING_USERS_QUERY_KEY = ["admin", "pending-users"];
 
@@ -107,17 +107,11 @@ function AcceptPage() {
     handleAcceptUser(userId);
   };
 
-  const logoutMutation = useMutation({
-    mutationFn: logoutApi,
-    onSuccess: (data) => {
-      toast.success(data.message || "Logged out successfully.");
-      navigate("/logout");
-    },
-    onError: (error) => {
-      handleApiError(error);
-      navigate("/logout");
-    },
-  });
+  const onLogout = () => {
+    handleLogout();
+    toast.success("Logged out successfully.");
+    navigate("/logout");
+  };
 
   return (
     <div className="flex min-h-svh flex-col bg-[#f4f5f8] text-[#10131a]">
@@ -158,8 +152,7 @@ function AcceptPage() {
             </nav>
             <Button
               type="button"
-              onClick={() => logoutMutation.mutate()}
-              disabled={logoutMutation.isPending}
+              onClick={onLogout}
               className="h-9 rounded-xl bg-[#2196de] px-5 text-sm font-medium text-white hover:bg-[#1389d3]"
             >
               Logout

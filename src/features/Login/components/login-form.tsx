@@ -17,8 +17,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { loginApi } from "../api/login.api";
-import { getMeApi } from "../api/me.api";
 import { isEmpty } from "../utils";
+import { useGetUser } from "@/shared/get-user";
 
 type LoginSuccessPayload = {
   access_token?: string;
@@ -44,6 +44,7 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const { refetch: refetchMe } = useGetUser(false);
 
   const loginMutation = useMutation({
     mutationFn: loginApi,
@@ -63,9 +64,10 @@ function LoginForm() {
       toast.success("Login successful.");
 
       try {
-        const me = await getMeApi();
+        const meResult = await refetchMe();
+        const me = meResult.data;
 
-        if (me.role === "admin") {
+        if (me?.role === "admin") {
           navigate("/admin/accept");
           return;
         }

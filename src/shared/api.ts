@@ -11,11 +11,6 @@ const axiosClient = axios.create({
   },
 });
 
-interface ApiErrorResponse {
-  message: string;
-  details: Record<string, string[]>;
-}
-
 const isPlainObject = (value: unknown): value is Record<string, unknown> => {
   return (
     typeof value === "object" &&
@@ -43,9 +38,14 @@ const toSnakeCase = (obj: unknown): unknown => {
 
 export const handleApiError = (error: unknown) => {
   if (axios.isAxiosError(error) && error.response) {
-    const resData = error.response.data as ApiErrorResponse;
+    const resData = error.response.data;
 
-    if (resData.details) {
+    if (error.response.status !== 200) {
+      toast.error(resData.error);
+      return
+    }
+
+    if (isPlainObject(resData) && resData.details) {
       const errorMessages = Object.values(resData.details).flat();
 
       if (errorMessages.length > 0) {
@@ -53,7 +53,7 @@ export const handleApiError = (error: unknown) => {
         return;
       }
     }
-    toast.error(resData.message || "Network error!");
+    toast.error(resData || "Network error!");
   } else {
     toast.error("Something went wrong. Please try again.");
   }
