@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/Footer";
-import { LogIn, Home, Heart } from "lucide-react";
+import { LogIn, Heart } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function LogoutPage() {
+  const navigate = useNavigate();
+
   return (
     <div className="flex min-h-screen flex-col font-sans">
       <header className="flex w-full items-center justify-center border-b bg-white py-6">
@@ -39,6 +42,8 @@ export default function LogoutPage() {
         <div className="my-10 flex flex-wrap justify-center gap-4">
          <Button 
             variant="outline"
+            type="button"
+            onClick={() => navigate("/login")}
             className="h-14 rounded-xl border-none bg-white px-8 text-[16px] font-semibold text-[#1d9bf0] hover:bg-gray-50"
           >
             Log in again <LogIn className="ml-2 size-5" />
