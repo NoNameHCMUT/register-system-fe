@@ -17,25 +17,9 @@ interface MeResponse {
   username: string;
 }
 
-type WrappedMeResponse = {
-  data: MeResponse;
-};
-
-const unwrapMeResponse = (
-  payload: MeResponse | WrappedMeResponse,
-): MeResponse => {
-  if (typeof payload === "object" && payload !== null && "data" in payload) {
-    return payload.data;
-  }
-
-  return payload;
-};
-
-const getMeApi = async (): Promise<MeResponse> => {
-  const response = await axiosClient.get<MeResponse | WrappedMeResponse>(
-    `${globalConfig}${ME_ENDPOINT}`,
-  );
-  return unwrapMeResponse(response);
+const getMeApi = async () => {
+  const response = await axiosClient.get(`${globalConfig}${ME_ENDPOINT}`);
+  return response.data;
 };
 
 export type { MeResponse };

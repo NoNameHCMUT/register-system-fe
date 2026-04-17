@@ -64,16 +64,16 @@ const getPendingUsersApi = async (): Promise<PendingUser[]> => {
 
 const acceptPendingUserApi = async (userId: number): Promise<PendingUser> => {
   const response = await axiosClient.post<PendingUserResponse>(
-    `${globalConfig}${REJECT_USER_ENDPOINT(userId)}`,
+    `${globalConfig}${ACCEPT_USER_ENDPOINT(userId)}`,
   );
   return toPendingUser(response.data);
 };
 
-const rejectPendingUserApi = async (userId: number): Promise<PendingUser> => {
-  const response = await axiosClient.post<PendingUserResponse>(
-    `${globalConfig}${ACCEPT_USER_ENDPOINT(userId)}`,
+const rejectPendingUserApi = async (userId: number) => {
+  const response = await axiosClient.post(
+    `${globalConfig}${REJECT_USER_ENDPOINT(userId)}`,
   );
-  return toPendingUser(response.data);
+  return response.data;
 };
 
 export type { PendingUser };
