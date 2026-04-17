@@ -6,7 +6,7 @@ import { LoginPage } from "./features/Login/login-page";
 import { queryClient } from "./shared/query-client";
 import LogoutPage from "./features/Logout/logout-page";
 import RegisterPage from "./features/Register/Register";
-import { StudentHome } from "./features/Student";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -27,7 +27,7 @@ function App() {
 
         <Routes>
           <Route path="/logout" element={<LogoutPage />} />
-          <Route path="/" element={<StudentHome />} />
+          <Route path="/" element={<ProtectedRoute />} />
           <Route path="/admin/accept" element={<AcceptPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
