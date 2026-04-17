@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label";
 
 import { loginApi } from "../api/login.api";
 import { isEmpty } from "../utils";
-import { useGetUser } from "@/shared/get-user";
+import { GET_USER_QUERY_KEY, useGetUser } from "@/shared/get-user";
 
 type LoginSuccessPayload = {
   access_token?: string;
@@ -41,6 +41,7 @@ const unwrapLoginResponse = (
 
 function LoginForm() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -63,15 +64,10 @@ function LoginForm() {
 
       toast.success("Login successful.");
 
+      await queryClient.invalidateQueries({ queryKey: GET_USER_QUERY_KEY });
+
       try {
-        const meResult = await refetchMe();
-        const me = meResult.data;
-
-        if (me?.role === "admin") {
-          navigate("/admin/accept");
-          return;
-        }
-
+        await refetchMe();
         navigate("/");
       } catch (error) {
         handleApiError(error);

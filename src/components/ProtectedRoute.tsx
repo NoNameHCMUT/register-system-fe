@@ -1,4 +1,5 @@
 import { useGetUser } from "@/shared/get-user";
+import { AdminHome } from "@/features/Admin/AdminHome";
 import CommunityDashboard from "@/features/Community/Dashboard/cDashboard";
 import { StudentHome } from "@/features/Student";
 import type { ReactNode } from "react";
@@ -25,6 +26,10 @@ export default function ProtectedRoute({ children }: Props) {
   }
 
   if (!children) {
+    if (me?.role === "admin") {
+      return <AdminHome />;
+    }
+
     if (me?.role === "community") {
       return <CommunityDashboard />;
     }

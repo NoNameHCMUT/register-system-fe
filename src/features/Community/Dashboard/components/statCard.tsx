@@ -1,7 +1,14 @@
 import { Card } from "@/components/ui/card";
 import React from "react";
 
-function StatCard({ icon, title, value, color }: any) {
+type IStatCardProps = {
+  icon: React.ReactElement<{ className?: string }>;
+  title: string;
+  value: string;
+  color: string;
+};
+
+function StatCard({ icon, title, value, color }: IStatCardProps) {
   return (
     <Card className="p-6 transition-transform hover:scale-[1.02]">
       <div className="flex items-center gap-4">
