@@ -6,7 +6,7 @@ import { LoginPage } from "./features/Login/login-page";
 import { queryClient } from "./shared/query-client";
 import LogoutPage from "./features/Logout/logout-page";
 import RegisterPage from "./features/Register/Register";
-import { StudentHome } from "./features/StudentHome";
+import { StudentHome } from "./features/Student";
 
 function App() {
   return (

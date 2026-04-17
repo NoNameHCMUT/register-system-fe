@@ -11,11 +11,6 @@ const axiosClient = axios.create({
   },
 });
 
-interface ApiErrorResponse {
-  message: string;
-  details: Record<string, string[]>;
-}
-
 const isPlainObject = (value: unknown): value is Record<string, unknown> => {
   return (
     typeof value === "object" &&
