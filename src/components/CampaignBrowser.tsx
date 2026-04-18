@@ -49,42 +49,6 @@ type CampaignBrowserProps = {
   showActionButton?: boolean;
 };
 
-const MOCK_CAMPAIGNS: CampaignItem[] = [
-  {
-    affiliationName: "University of Science",
-    bannerUrl: "/assets/campaigns/education_campaign_1775894477648.png",
-    dateApproved: "2026-04-01T08:00:00Z",
-    id: 9001,
-    name: "Green Campus Weekend",
-    numAttending: 65,
-    numMax: 120,
-    projectEndDay: "2026-07-14",
-    projectStartDay: "2026-07-10",
-  },
-  {
-    affiliationName: "Tech Community Center",
-    bannerUrl: "/assets/campaigns/education_campaign_1775894477648.png",
-    dateApproved: null,
-    id: 9002,
-    name: "Digital Literacy For Seniors",
-    numAttending: 22,
-    numMax: 80,
-    projectEndDay: "2026-08-03",
-    projectStartDay: "2026-08-01",
-  },
-  {
-    affiliationName: "City Youth Union",
-    bannerUrl: "/assets/campaigns/education_campaign_1775894477648.png",
-    dateApproved: "2026-04-05T09:30:00Z",
-    id: 9003,
-    name: "Summer Reading Caravan",
-    numAttending: 48,
-    numMax: 60,
-    projectEndDay: "2026-06-25",
-    projectStartDay: "2026-06-20",
-  },
-];
-
 const formatDate = (value: string) => {
   const parsedDate = new Date(value);
 
@@ -147,7 +111,7 @@ function CampaignBrowser({
     role === "admin" || role === "school" || role === "community";
   const isStudentRole = role === "student";
   const isApproveAction = actionVariant === "approve";
-  const sourceProjects = projects.length > 0 ? projects : MOCK_CAMPAIGNS;
+  const sourceProjects = projects;
 
   const availableAffiliations = useMemo(() => {
     if (affiliations && affiliations.length > 0) {
@@ -655,8 +619,13 @@ function CampaignBrowser({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={onConfirmRegister} className="cursor-pointer">
+            <AlertDialogCancel className="cursor-pointer">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={onConfirmRegister}
+              className="cursor-pointer"
+            >
               Confirm
             </AlertDialogAction>
           </AlertDialogFooter>

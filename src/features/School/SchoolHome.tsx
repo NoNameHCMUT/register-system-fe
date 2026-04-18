@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -9,13 +9,13 @@ import {
 } from "@/components/CampaignBrowser";
 import { Footer } from "@/components/Footer";
 import { UserHeader } from "@/components/UserHeader";
-import { getCommunityProjectsApi } from "@/features/Community/Dashboard/api/project.api";
 import { handleLogout } from "@/features/Login/api/logout.api";
 import { useGetUser } from "@/shared/get-user";
 
-import { approveSchoolCampaignApi } from "./api/school.api";
-
-const COMMUNITY_PROJECTS_QUERY_KEY = ["community", "projects"] as const;
+import {
+  approveSchoolCampaignApi,
+  getSchoolCampaignApi,
+} from "./api/school.api";
 
 function SchoolHome() {
   const navigate = useNavigate();
@@ -26,31 +26,17 @@ function SchoolHome() {
 
   const { data: me } = useGetUser();
   const { data: projects = [], isLoading: isLoadingProjects } = useQuery({
-    queryKey: COMMUNITY_PROJECTS_QUERY_KEY,
-    queryFn: getCommunityProjectsApi,
+    queryKey: ["school", "projects"],
+    queryFn: getSchoolCampaignApi,
   });
 
   const approveCampaignMutation = useMutation({
     mutationFn: approveSchoolCampaignApi,
     onSuccess: () => {
       toast.success("Campaign approved successfully.");
-      queryClient.invalidateQueries({ queryKey: COMMUNITY_PROJECTS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ["school", "projects"] });
     },
   });
-
-  const campaignItems = useMemo<CampaignItem[]>(() => {
-    return projects.map((project) => ({
-      affiliationName: project.affiliation.stdName,
-      bannerUrl: project.bannerUrl,
-      dateApproved: project.dateApproved,
-      id: project.id,
-      name: project.name,
-      numAttending: project.numAttending,
-      numMax: project.numMax,
-      projectEndDay: project.projectEndDay,
-      projectStartDay: project.projectStartDay,
-    }));
-  }, [projects]);
 
   const onApproveCampaign = async (project: CampaignItem) => {
     if (project.dateApproved || approveCampaignMutation.isPending) {
@@ -86,7 +72,7 @@ function SchoolHome() {
         introTitle="Welcome back, School Representative"
         isLoadingProjects={isLoadingProjects}
         onActionClick={onApproveCampaign}
-        projects={campaignItems}
+        projects={projects}
         role={me?.role}
         showHero={false}
         showActionButton
