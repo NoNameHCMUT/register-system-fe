@@ -12,6 +12,7 @@ import { UserHeader } from "@/components/UserHeader";
 import { getCommunityProjectsApi } from "@/features/Community/Dashboard/api/project.api";
 import { handleLogout } from "@/features/Login/api/logout.api";
 import { useGetUser } from "@/shared/get-user";
+import { globalConfig } from "@/shared/api";
 
 function CommunityHome() {
   const navigate = useNavigate();
@@ -24,7 +25,7 @@ function CommunityHome() {
   const campaignItems = useMemo<CampaignItem[]>(() => {
     return projects.map((project) => ({
       affiliationName: project.affiliation.stdName,
-      bannerUrl: project.bannerUrl,
+      bannerUrl: `${globalConfig}/uploads${project.bannerUrl}`,
       dateApproved: project.dateApproved,
       id: project.id,
       name: project.name,

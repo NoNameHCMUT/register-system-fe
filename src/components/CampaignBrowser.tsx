@@ -49,42 +49,6 @@ type CampaignBrowserProps = {
   showActionButton?: boolean;
 };
 
-const MOCK_CAMPAIGNS: CampaignItem[] = [
-  {
-    affiliationName: "University of Science",
-    bannerUrl: "/assets/campaigns/education_campaign_1775894477648.png",
-    dateApproved: "2026-04-01T08:00:00Z",
-    id: 9001,
-    name: "Green Campus Weekend",
-    numAttending: 65,
-    numMax: 120,
-    projectEndDay: "2026-07-14",
-    projectStartDay: "2026-07-10",
-  },
-  {
-    affiliationName: "Tech Community Center",
-    bannerUrl: "/assets/campaigns/education_campaign_1775894477648.png",
-    dateApproved: null,
-    id: 9002,
-    name: "Digital Literacy For Seniors",
-    numAttending: 22,
-    numMax: 80,
-    projectEndDay: "2026-08-03",
-    projectStartDay: "2026-08-01",
-  },
-  {
-    affiliationName: "City Youth Union",
-    bannerUrl: "/assets/campaigns/education_campaign_1775894477648.png",
-    dateApproved: "2026-04-05T09:30:00Z",
-    id: 9003,
-    name: "Summer Reading Caravan",
-    numAttending: 48,
-    numMax: 60,
-    projectEndDay: "2026-06-25",
-    projectStartDay: "2026-06-20",
-  },
-];
-
 const formatDate = (value: string) => {
   const parsedDate = new Date(value);
 
@@ -95,7 +59,17 @@ const formatDate = (value: string) => {
   return parsedDate.toLocaleDateString("en-GB");
 };
 
-const toDateOnly = (value: string) => {
+const removeAccents = (str: string) => {
+  if (!str) return "";
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D");
+};
+
+const toDateOnly = (value?: string | null) => {
+  if (!value) return null;
   const datePart = value.slice(0, 10);
   const parsedDate = new Date(datePart);
 
@@ -147,7 +121,7 @@ function CampaignBrowser({
     role === "admin" || role === "school" || role === "community";
   const isStudentRole = role === "student";
   const isApproveAction = actionVariant === "approve";
-  const sourceProjects = projects.length > 0 ? projects : MOCK_CAMPAIGNS;
+  const sourceProjects = projects;
 
   const availableAffiliations = useMemo(() => {
     if (affiliations && affiliations.length > 0) {
@@ -160,15 +134,15 @@ function CampaignBrowser({
   }, [affiliations, sourceProjects]);
 
   const filteredProjects = useMemo(() => {
-    const keyword = appliedSearchValue.trim().toLowerCase();
+    const keyword = removeAccents(appliedSearchValue.trim().toLowerCase());
     const normalizedAppliedStartDate = appliedStartDate || null;
     const normalizedAppliedEndDate = appliedEndDate || null;
 
     return sourceProjects.filter((project) => {
       const matchesKeyword =
         !keyword ||
-        project.name.toLowerCase().includes(keyword) ||
-        project.affiliationName.toLowerCase().includes(keyword);
+        removeAccents(project.name?.toLowerCase() || "").includes(keyword) ||
+        removeAccents(project.affiliationName?.toLowerCase() || "").includes(keyword);
 
       const matchesAffiliation =
         selectedAffiliation === "all" ||
@@ -179,13 +153,13 @@ function CampaignBrowser({
 
       const matchesStartDate =
         !normalizedAppliedStartDate ||
-        (normalizedProjectEndDate !== null &&
-          normalizedProjectEndDate >= normalizedAppliedStartDate);
+        (normalizedProjectStartDate !== null &&
+          normalizedProjectStartDate >= normalizedAppliedStartDate);
 
       const matchesEndDate =
         !normalizedAppliedEndDate ||
-        (normalizedProjectStartDate !== null &&
-          normalizedProjectStartDate <= normalizedAppliedEndDate);
+        (normalizedProjectEndDate !== null &&
+          normalizedProjectEndDate <= normalizedAppliedEndDate);
 
       return (
         matchesKeyword &&
@@ -655,8 +629,13 @@ function CampaignBrowser({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={onConfirmRegister} className="cursor-pointer">
+            <AlertDialogCancel className="cursor-pointer">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={onConfirmRegister}
+              className="cursor-pointer"
+            >
               Confirm
             </AlertDialogAction>
           </AlertDialogFooter>
