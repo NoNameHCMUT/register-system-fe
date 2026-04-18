@@ -1,7 +1,7 @@
 import axiosClient, { globalConfig } from "@/shared/api";
 
 const PROJECTS_ENDPOINT = "/projects";
-const COMMUNITY_PROJECTS_ENDPOINT = "/community/projects";
+const COMMUNITY_PROJECTS_ENDPOINT = "/communities/projects";
 
 interface CommunityProject {
   affiliation: {
