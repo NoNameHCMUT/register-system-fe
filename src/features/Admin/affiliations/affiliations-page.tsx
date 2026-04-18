@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { CircleAlert, Download, Plus } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Download, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -9,8 +9,9 @@ import { UserHeader } from "@/components/UserHeader";
 import { handleLogout } from "@/features/Login/api/logout.api";
 import {
   getAffiliationsApi,
-  type Affiliation,
 } from "@/features/Register/api/register.api";
+import { addAffiliationsApi } from "./api/affiliations.api";
+import { handleApiError } from "@/shared/api";
 import { useGetUser } from "@/shared/get-user";
 
 const ITEMS_PER_PAGE = 4;
@@ -28,27 +29,23 @@ const buildMockDescription = (name: string) => {
 function AffiliationsPage() {
   const navigate = useNavigate();
   const { data: me } = useGetUser();
+  const queryClient = useQueryClient();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [localRows, setLocalRows] = useState<AffiliationRow[]>([]);
 
   const { data: affiliations = [], isLoading } = useQuery({
     queryKey: ["affiliations"],
     queryFn: getAffiliationsApi,
   });
 
-  const apiRows = useMemo<AffiliationRow[]>(() => {
-    return affiliations.map((item: Affiliation) => ({
-      description: buildMockDescription(item.std_name),
+  const rows = useMemo<AffiliationRow[]>(() => {
+    return affiliations.map((item: any) => ({
+      description: item.description || buildMockDescription(item.std_name),
       id: item.id,
       name: item.std_name,
     }));
   }, [affiliations]);
-
-  const rows = useMemo(() => {
-    return [...localRows, ...apiRows];
-  }, [apiRows, localRows]);
 
   const totalPages = Math.max(1, Math.ceil(rows.length / ITEMS_PER_PAGE));
   const safePage = Math.min(currentPage, totalPages);
@@ -87,6 +84,20 @@ function AffiliationsPage() {
     URL.revokeObjectURL(url);
   };
 
+  const addMutation = useMutation({
+    mutationFn: addAffiliationsApi,
+    onSuccess: () => {
+      toast.success("Affiliation added successfully.");
+      queryClient.invalidateQueries({ queryKey: ["affiliations"] });
+      setName("");
+      setDescription("");
+      setCurrentPage(1);
+    },
+    onError: (error) => {
+      handleApiError(error);
+    },
+  });
+
   const onAddAffiliation = () => {
     const trimmedName = name.trim();
     const trimmedDescription = description.trim();
@@ -101,17 +112,9 @@ function AffiliationsPage() {
       return;
     }
 
-    const newRow: AffiliationRow = {
-      description: trimmedDescription,
-      id: Date.now(),
-      name: trimmedName,
-    };
-
-    setLocalRows((prevRows) => [newRow, ...prevRows]);
-    setName("");
-    setDescription("");
-    setCurrentPage(1);
-    toast.success("Affiliation added to current list.");
+    if (!addMutation.isPending) {
+      addMutation.mutate({ std_name: trimmedName, description: trimmedDescription });
+    }
   };
 
   return (
@@ -150,22 +153,21 @@ function AffiliationsPage() {
               <table className="w-full border-separate border-spacing-y-2">
                 <thead>
                   <tr className="text-left text-xs font-semibold uppercase tracking-[0.08em] text-[#8b94a8]">
-                    <th className="pb-1">Name</th>
-                    <th className="pb-1">Description</th>
-                    <th className="pb-1">Act</th>
+                    <th className="pb-1 w-1/3">Name</th>
+                    <th className="pb-1 w-2/3">Description</th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {isLoading ? (
                     <tr>
-                      <td className="pt-2 text-sm text-[#667085]" colSpan={4}>
+                      <td className="pt-2 text-sm text-[#667085]" colSpan={2}>
                         Loading affiliations...
                       </td>
                     </tr>
                   ) : paginatedRows.length === 0 ? (
                     <tr>
-                      <td className="pt-2 text-sm text-[#667085]" colSpan={4}>
+                      <td className="pt-2 text-sm text-[#667085]" colSpan={2}>
                         No affiliations found.
                       </td>
                     </tr>
@@ -175,13 +177,12 @@ function AffiliationsPage() {
                         key={row.id}
                         className="align-top text-[13px] text-[#313b50]"
                       >
-                        <td className="w-[190px] pt-1.5 font-semibold leading-5 text-[#1d2535]">
+                        <td className="pt-1.5 pr-4 font-semibold leading-5 text-[#1d2535]">
                           {row.name}
                         </td>
-                        <td className="max-w-[380px] pt-1.5 pr-4 leading-5 text-[#626c80]">
+                        <td className="pt-1.5 pr-4 leading-5 text-[#626c80]">
                           {row.description}
                         </td>
-                        <td className="w-[50px] pt-1.5 text-[#9aa3b6]">-</td>
                       </tr>
                     ))
                   )}
@@ -254,25 +255,22 @@ function AffiliationsPage() {
               <button
                 type="button"
                 onClick={onAddAffiliation}
-                className="inline-flex cursor-pointer h-7 w-full items-center justify-center gap-1 rounded-lg bg-[#1f53d8] text-xs font-semibold text-white transition-colors hover:bg-[#1948bf]"
+                disabled={addMutation.isPending}
+                className="inline-flex cursor-pointer h-7 w-full items-center justify-center gap-1 rounded-lg bg-[#1f53d8] text-xs font-semibold text-white transition-colors hover:bg-[#1948bf] disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 <Plus size={12} />
-                Add Affiliation
+                {addMutation.isPending ? "Adding..." : "Add Affiliation"}
               </button>
             </div>
 
             <div className="mt-3 rounded-lg bg-[#f4f6fa] p-2.5">
               <div className="flex items-start gap-2">
-                <div className="mt-0.5 inline-flex size-5 items-center justify-center rounded-full bg-[#dce7ff] text-[#2751cb]">
-                  <CircleAlert size={12} />
-                </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#4f5b72]">
                     Admin Tip
                   </p>
                   <p className="mt-0.5 text-[10px] leading-4 text-[#626d84] md:text-xs">
-                    Ensure descriptions mention the primary point of contact for
-                    smoother communication.
+                    Ensure descriptions mention the primary point of contact
                   </p>
                 </div>
               </div>

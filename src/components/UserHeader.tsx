@@ -19,7 +19,7 @@ const getNavItemsByRole = (role?: string): NavItem[] => {
   if (role === "admin") {
     return [
       { label: "Campaigns", to: "/" },
-      { label: "List Users" },
+      { label: "List Users", to: "/admin/users" },
       { label: "List Affiliations", to: "/admin/affiliations" },
       { label: "My Profile" },
     ];
@@ -33,10 +33,7 @@ const getNavItemsByRole = (role?: string): NavItem[] => {
     ];
   }
 
-  return [
-    { label: "Campaigns", to: "/" },
-    { label: "My Profile" },
-  ];
+  return [{ label: "Campaigns", to: "/" }, { label: "My Profile" }];
 };
 
 function UserHeader({ isPublic = false, role, onLogout }: UserHeaderProps) {

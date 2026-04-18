@@ -1,7 +1,7 @@
 import { Toaster } from "sonner";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { AcceptPage } from "./features/Admin/accept/accept-page";
+import { UsersPage } from "./features/Admin/users/users-page";
 import { AffiliationsPage } from "./features/Admin/affiliations/affiliations-page";
 import { CommunityHome } from "./features/Community/CommunityHome";
 import { LoginPage } from "./features/Login/login-page";
@@ -46,7 +46,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/admin/accept" element={<AcceptPage />} />
+          <Route path="/admin/users" element={<UsersPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
