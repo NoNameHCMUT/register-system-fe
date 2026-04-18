@@ -2,7 +2,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Footer } from "@/components/Footer";
-import { CampaignBrowser, type CampaignItem } from "@/components/CampaignBrowser";
+import {
+  CampaignBrowser,
+  type CampaignItem,
+} from "@/components/CampaignBrowser";
 import { UserHeader } from "@/components/UserHeader";
 import { handleLogout } from "../Login/api/logout.api";
 import { toast } from "sonner";
@@ -13,6 +16,7 @@ import {
   getStudentProjectsApi,
   type StudentApplicationStatus,
 } from "./api/student.api";
+import { globalConfig } from "@/shared/api";
 
 export function StudentHome() {
   const navigate = useNavigate();
@@ -28,10 +32,12 @@ export function StudentHome() {
     queryKey: ["student", "projects"],
     queryFn: getStudentProjectsApi,
   });
-  const { data: applications = [], isLoading: isLoadingApplications } = useQuery({
-    queryKey: ["student", "applications"],
-    queryFn: getStudentApplicationsApi,
-  });
+  const { data: applications = [], isLoading: isLoadingApplications } =
+    useQuery({
+      queryKey: ["student", "applications"],
+      queryFn: getStudentApplicationsApi,
+    });
+  console.log("🚀 ~ StudentHome ~ applications:", applications);
 
   const applyProjectMutation = useMutation({
     mutationFn: applyStudentProjectApi,
@@ -48,7 +54,7 @@ export function StudentHome() {
   const campaignItems = useMemo<CampaignItem[]>(() => {
     return projects.map((project) => ({
       affiliationName: project.affiliation.stdName,
-      bannerUrl: project.bannerUrl,
+      bannerUrl: `${globalConfig}/uploads${project.bannerUrl}`,
       dateApproved: project.dateApproved,
       id: project.id,
       name: project.name,
@@ -61,27 +67,37 @@ export function StudentHome() {
 
   const registeredCampaignItems = useMemo<CampaignItem[]>(() => {
     return applications.map((application) => ({
-      affiliationName: application.project.affiliation.stdName,
+      affiliationName: application.project.affiliation.std_name,
       applicationStatus: application.status,
-      bannerUrl: application.project.bannerUrl,
-      dateApproved: application.project.dateApproved,
+      bannerUrl: `${globalConfig}/uploads${application.project.banner_url}`,
+      dateApproved: application.project.date_approved,
       id: application.project.id,
       name: application.project.name,
-      numAttending: application.project.numAttending,
-      numMax: application.project.numMax,
-      projectEndDay: application.project.projectEndDay,
-      projectStartDay: application.project.projectStartDay,
+      numAttending: application.project.num_attending,
+      numMax: application.project.num_max,
+      projectEndDay: application.project.project_end_day,
+      projectStartDay: application.project.project_start_day,
     }));
   }, [applications]);
 
   const registeredByStatusItems = useMemo(() => {
-    return registeredCampaignItems.filter(
-      (project) => project.applicationStatus === applicationStatusTab,
-    );
+    return registeredCampaignItems.filter((project) => {
+      return project.applicationStatus === applicationStatusTab;
+    });
   }, [applicationStatusTab, registeredCampaignItems]);
 
   const displayItems =
-    studentTab === "school" ? campaignItems : registeredByStatusItems;
+    studentTab === "school"
+      ? campaignItems.filter(
+        (campaign) =>
+          !registeredCampaignItems.some(
+            (registered) =>
+              registered.id === campaign.id &&
+              registered.applicationStatus === "SCHOOL_PENDING",
+          ),
+      )
+      : registeredByStatusItems;
+  console.log("🚀 ~ StudentHome ~ displayItems:", displayItems);
   const isLoadingDisplayProjects =
     studentTab === "school" ? isLoadingProjects : isLoadingApplications;
 
@@ -119,22 +135,20 @@ export function StudentHome() {
               <button
                 type="button"
                 onClick={() => setStudentTab("school")}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold md:text-sm ${
-                  studentTab === "school"
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold md:text-sm ${studentTab === "school"
                     ? "bg-[#2b50da] text-white"
                     : "text-[#4f5b70]"
-                }`}
+                  }`}
               >
                 School Campaigns
               </button>
               <button
                 type="button"
                 onClick={() => setStudentTab("registered")}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold md:text-sm ${
-                  studentTab === "registered"
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold md:text-sm ${studentTab === "registered"
                     ? "bg-[#2b50da] text-white"
                     : "text-[#4f5b70]"
-                }`}
+                  }`}
               >
                 My Registered
               </button>
@@ -145,22 +159,20 @@ export function StudentHome() {
                 <button
                   type="button"
                   onClick={() => setApplicationStatusTab("SCHOOL_PENDING")}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold md:text-sm ${
-                    applicationStatusTab === "SCHOOL_PENDING"
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold md:text-sm ${applicationStatusTab === "SCHOOL_PENDING"
                       ? "bg-[#2b50da] text-white"
                       : "text-[#4f5b70]"
-                  }`}
+                    }`}
                 >
                   Pending
                 </button>
                 <button
                   type="button"
                   onClick={() => setApplicationStatusTab("SCHOOL_APPROVED")}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold md:text-sm ${
-                    applicationStatusTab === "SCHOOL_APPROVED"
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold md:text-sm ${applicationStatusTab === "SCHOOL_APPROVED"
                       ? "bg-[#2b50da] text-white"
                       : "text-[#4f5b70]"
-                  }`}
+                    }`}
                 >
                   Approved
                 </button>
@@ -168,7 +180,9 @@ export function StudentHome() {
             )}
           </div>
         }
-        onRegisterClick={studentTab === "school" ? onRegisterCampaign : undefined}
+        onRegisterClick={
+          studentTab === "school" ? onRegisterCampaign : undefined
+        }
         projects={displayItems}
         registerButtonLabel="Register"
         registerLoadingProjectId={
