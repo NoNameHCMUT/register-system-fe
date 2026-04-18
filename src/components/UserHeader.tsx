@@ -16,28 +16,27 @@ type NavItem = {
 };
 
 const getNavItemsByRole = (role?: string): NavItem[] => {
-  if (role === "admin") {
     return [
       { label: "Campaigns", to: "/" },
-      { label: "List Users" },
+      { label: "List Users", to: "/admin/accept" },
       { label: "List Affiliations", to: "/admin/affiliations" },
       { label: "My Profile" },
     ];
   }
 
-  if (role === "community") {
-    return [
-      { label: "Dashboard", to: "/" },
-      { label: "My Campaigns", to: "/community/campaigns" },
-      { label: "My Profile" },
-    ];
-  }
+//   if (role === "community") {
+//     return [
+//       { label: "Dashboard", to: "/" },
+//       { label: "My Campaigns", to: "/community/campaigns" },
+//       { label: "My Profile" },
+//     ];
+//   }
 
-  return [
-    { label: "Campaigns", to: "/" },
-    { label: "My Profile" },
-  ];
-};
+//   return [
+//     { label: "Campaigns", to: "/" },
+//     { label: "My Profile" },
+//   ];
+// };
 
 function UserHeader({ isPublic = false, role, onLogout }: UserHeaderProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);

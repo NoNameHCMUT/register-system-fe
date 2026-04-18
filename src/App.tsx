@@ -9,6 +9,7 @@ import { queryClient } from "./shared/query-client";
 import LogoutPage from "./features/Logout/logout-page";
 import RegisterPage from "./features/Register/Register";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { AdminHome } from "./features/Admin/AdminHome";
 
 function App() {
   return (
@@ -29,21 +30,21 @@ function App() {
 
         <Routes>
           <Route path="/logout" element={<LogoutPage />} />
-          <Route path="/" element={<ProtectedRoute />} />
+          <Route path="/admin" element={<AdminHome />} />
           <Route
             path="/community/campaigns"
             element={
-              <ProtectedRoute>
+              // <ProtectedRoute>
                 <CommunityHome />
-              </ProtectedRoute>
+              // </ProtectedRoute>
             }
           />
           <Route
             path="/admin/affiliations"
             element={
-              <ProtectedRoute>
+              // <ProtectedRoute>
                 <AffiliationsPage />
-              </ProtectedRoute>
+              // </ProtectedRoute>
             }
           />
           <Route path="/admin/accept" element={<AcceptPage />} />
