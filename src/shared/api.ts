@@ -112,12 +112,16 @@ axiosClient.interceptors.response.use(
       _retry?: boolean;
     };
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    const isAuthRequest = originalRequest.url?.includes("/auth/login") || originalRequest.url?.includes("/auth/register");
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthRequest) {
       const refreshToken = localStorage.getItem("refreshToken");
 
       if (!refreshToken) {
         localStorage.removeItem("accessToken");
-        window.location.href = "/login";
+        if (window.location.pathname !== "/login") {
+          window.location.href = "/login";
+        }
         return Promise.reject(error);
       }
 
@@ -146,7 +150,9 @@ axiosClient.interceptors.response.use(
         processQueue(refreshError);
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
-        window.location.href = "/login";
+        if (window.location.pathname !== "/login") {
+          window.location.href = "/login";
+        }
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

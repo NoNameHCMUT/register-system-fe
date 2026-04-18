@@ -37,7 +37,6 @@ export function StudentHome() {
       queryKey: ["student", "applications"],
       queryFn: getStudentApplicationsApi,
     });
-  console.log("🚀 ~ StudentHome ~ applications:", applications);
 
   const applyProjectMutation = useMutation({
     mutationFn: applyStudentProjectApi,
@@ -82,6 +81,9 @@ export function StudentHome() {
 
   const registeredByStatusItems = useMemo(() => {
     return registeredCampaignItems.filter((project) => {
+      if (applicationStatusTab === "SCHOOL_PENDING") {
+        return project.applicationStatus === "SCHOOL_PENDING" || project.applicationStatus === "COMMUNITY_PENDING";
+      }
       return project.applicationStatus === applicationStatusTab;
     });
   }, [applicationStatusTab, registeredCampaignItems]);
@@ -93,11 +95,10 @@ export function StudentHome() {
           !registeredCampaignItems.some(
             (registered) =>
               registered.id === campaign.id &&
-              registered.applicationStatus === "SCHOOL_PENDING",
+              (registered.applicationStatus === "SCHOOL_PENDING" || registered.applicationStatus === "COMMUNITY_PENDING") || registered.applicationStatus === "APPROVED",
           ),
       )
       : registeredByStatusItems;
-  console.log("🚀 ~ StudentHome ~ displayItems:", displayItems);
   const isLoadingDisplayProjects =
     studentTab === "school" ? isLoadingProjects : isLoadingApplications;
 
@@ -136,8 +137,8 @@ export function StudentHome() {
                 type="button"
                 onClick={() => setStudentTab("school")}
                 className={`rounded-lg px-3 py-1.5 text-xs font-semibold md:text-sm ${studentTab === "school"
-                    ? "bg-[#2b50da] text-white"
-                    : "text-[#4f5b70]"
+                  ? "bg-[#2b50da] text-white"
+                  : "text-[#4f5b70]"
                   }`}
               >
                 School Campaigns
@@ -146,8 +147,8 @@ export function StudentHome() {
                 type="button"
                 onClick={() => setStudentTab("registered")}
                 className={`rounded-lg px-3 py-1.5 text-xs font-semibold md:text-sm ${studentTab === "registered"
-                    ? "bg-[#2b50da] text-white"
-                    : "text-[#4f5b70]"
+                  ? "bg-[#2b50da] text-white"
+                  : "text-[#4f5b70]"
                   }`}
               >
                 My Registered
@@ -160,18 +161,18 @@ export function StudentHome() {
                   type="button"
                   onClick={() => setApplicationStatusTab("SCHOOL_PENDING")}
                   className={`rounded-lg px-3 py-1.5 text-xs font-semibold md:text-sm ${applicationStatusTab === "SCHOOL_PENDING"
-                      ? "bg-[#2b50da] text-white"
-                      : "text-[#4f5b70]"
+                    ? "bg-[#2b50da] text-white"
+                    : "text-[#4f5b70]"
                     }`}
                 >
                   Pending
                 </button>
                 <button
                   type="button"
-                  onClick={() => setApplicationStatusTab("SCHOOL_APPROVED")}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold md:text-sm ${applicationStatusTab === "SCHOOL_APPROVED"
-                      ? "bg-[#2b50da] text-white"
-                      : "text-[#4f5b70]"
+                  onClick={() => setApplicationStatusTab("APPROVED")}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold md:text-sm ${applicationStatusTab === "APPROVED"
+                    ? "bg-[#2b50da] text-white"
+                    : "text-[#4f5b70]"
                     }`}
                 >
                   Approved

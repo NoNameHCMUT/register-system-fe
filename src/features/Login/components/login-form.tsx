@@ -71,7 +71,6 @@ function LoginForm() {
         navigate("/");
       } catch (error) {
         handleApiError(error);
-        navigate("/");
       }
     },
     onError: (error) => {

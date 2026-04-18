@@ -4,7 +4,7 @@ const STUDENT_APPLICATIONS_ENDPOINT = "/students/applications";
 const APPLY_STUDENT_PROJECT_ENDPOINT = (projectId: number) =>
   `/students/projects/${projectId}/apply`;
 
-type StudentApplicationStatus = "SCHOOL_PENDING" | "SCHOOL_APPROVED" | string;
+type StudentApplicationStatus = "SCHOOL_PENDING" | "COMMUNITY_PENDING" | "APPROVED" | string;
 
 interface Affiliation {
   description: string;
@@ -152,7 +152,11 @@ const getStudentApplicationsApi = async () => {
     `${globalConfig}${STUDENT_APPLICATIONS_ENDPOINT}`,
   );
 
-  return response.data;
+  const raw = response.data as any;
+  if (raw && Array.isArray(raw.data)) {
+    return raw.data;
+  }
+  return Array.isArray(raw) ? raw : [];
 };
 
 
