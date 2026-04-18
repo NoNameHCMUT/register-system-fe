@@ -1,6 +1,7 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import _ from "lodash";
 import { toast } from "sonner";
+import { refreshTokenApi } from "@/shared/refresh-token.api";
 
 export const globalConfig = import.meta.env.VITE_API_URL;
 
@@ -10,11 +11,6 @@ const axiosClient = axios.create({
     "Content-Type": "application/json",
   },
 });
-
-interface ApiErrorResponse {
-  message: string;
-  details: Record<string, string[]>;
-}
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> => {
   return (
@@ -43,9 +39,14 @@ const toSnakeCase = (obj: unknown): unknown => {
 
 export const handleApiError = (error: unknown) => {
   if (axios.isAxiosError(error) && error.response) {
-    const resData = error.response.data as ApiErrorResponse;
+    const resData = error.response.data;
 
-    if (resData.details) {
+    if (error.response.status !== 200) {
+      toast.error(resData.error);
+      return
+    }
+
+    if (isPlainObject(resData) && resData.details) {
       const errorMessages = Object.values(resData.details).flat();
 
       if (errorMessages.length > 0) {
@@ -53,7 +54,7 @@ export const handleApiError = (error: unknown) => {
         return;
       }
     }
-    toast.error(resData.message || "Network error!");
+    toast.error(resData || "Network error!");
   } else {
     toast.error("Something went wrong. Please try again.");
   }
@@ -85,11 +86,73 @@ axiosClient.interceptors.request.use(
   (error: AxiosError) => Promise.reject(error),
 );
 
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value: unknown) => void;
+  reject: (reason: unknown) => void;
+}> = [];
+
+const processQueue = (error: unknown) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(undefined);
+    }
+  });
+  failedQueue = [];
+};
+
 axiosClient.interceptors.response.use(
   (response) => {
     return response.data;
   },
   async (error) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      const refreshToken = localStorage.getItem("refreshToken");
+
+      if (!refreshToken) {
+        localStorage.removeItem("accessToken");
+        window.location.href = "/login";
+        return Promise.reject(error);
+      }
+
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then(() => axiosClient(originalRequest));
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const data = await refreshTokenApi(refreshToken);
+
+        if (data.access_token) {
+          localStorage.setItem("accessToken", data.access_token);
+        }
+        if (data.refresh_token) {
+          localStorage.setItem("refreshToken", data.refresh_token);
+        }
+
+        processQueue(null);
+        return axiosClient(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError);
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        window.location.href = "/login";
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
     return Promise.reject(error);
   },
 );

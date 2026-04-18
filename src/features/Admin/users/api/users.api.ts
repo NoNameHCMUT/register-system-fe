@@ -1,10 +1,10 @@
 import axiosClient, { globalConfig } from "@/shared/api";
 
-const PENDING_USERS_ENDPOINT = "/admin/users/pending";
+const PENDING_USERS_ENDPOINT = "/admins/users/pending";
 const ACCEPT_USER_ENDPOINT = (userId: number) =>
-  `/admin/users/${userId}/accept`;
+  `/admins/users/${userId}/accept`;
 const REJECT_USER_ENDPOINT = (userId: number) =>
-  `/admin/users/${userId}/reject`;
+  `/admins/users/${userId}/reject`;
 
 interface Affiliation {
   id: number;
@@ -62,19 +62,26 @@ const getPendingUsersApi = async (): Promise<PendingUser[]> => {
   return response.data.map(toPendingUser);
 };
 
-const acceptPendingUserApi = async (userId: number): Promise<PendingUser> => {
-  const response = await axiosClient.post<PendingUserResponse>(
-    `${globalConfig}${REJECT_USER_ENDPOINT(userId)}`,
+const getAcceptedUsersApi = async (): Promise<PendingUser[]> => {
+  const response = await axiosClient.get<PendingUserResponse[]>(
+    `${globalConfig}${ALL_USERS_ENDPOINT}`,
   );
-  return toPendingUser(response.data);
+  return response.data.map(toPendingUser);
 };
 
-const rejectPendingUserApi = async (userId: number): Promise<PendingUser> => {
+const acceptPendingUserApi = async (userId: number): Promise<PendingUser> => {
   const response = await axiosClient.post<PendingUserResponse>(
     `${globalConfig}${ACCEPT_USER_ENDPOINT(userId)}`,
   );
   return toPendingUser(response.data);
 };
 
+const rejectPendingUserApi = async (userId: number) => {
+  const response = await axiosClient.post(
+    `${globalConfig}${REJECT_USER_ENDPOINT(userId)}`,
+  );
+  return response.data;
+};
+
 export type { PendingUser };
-export { acceptPendingUserApi, getPendingUsersApi, rejectPendingUserApi };
+export { acceptPendingUserApi, getPendingUsersApi, getAcceptedUsersApi, rejectPendingUserApi };
