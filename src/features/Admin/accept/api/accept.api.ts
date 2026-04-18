@@ -1,10 +1,10 @@
 import axiosClient, { globalConfig } from "@/shared/api";
 
-const PENDING_USERS_ENDPOINT = "/admin/users/pending";
+const PENDING_USERS_ENDPOINT = "/admins/users/pending";
 const ACCEPT_USER_ENDPOINT = (userId: number) =>
-  `/admin/users/${userId}/accept`;
+  `/admins/users/${userId}/accept`;
 const REJECT_USER_ENDPOINT = (userId: number) =>
-  `/admin/users/${userId}/reject`;
+  `/admins/users/${userId}/reject`;
 
 interface Affiliation {
   id: number;
