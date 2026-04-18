@@ -59,7 +59,17 @@ const formatDate = (value: string) => {
   return parsedDate.toLocaleDateString("en-GB");
 };
 
-const toDateOnly = (value: string) => {
+const removeAccents = (str: string) => {
+  if (!str) return "";
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D");
+};
+
+const toDateOnly = (value?: string | null) => {
+  if (!value) return null;
   const datePart = value.slice(0, 10);
   const parsedDate = new Date(datePart);
 
@@ -124,15 +134,15 @@ function CampaignBrowser({
   }, [affiliations, sourceProjects]);
 
   const filteredProjects = useMemo(() => {
-    const keyword = appliedSearchValue.trim().toLowerCase();
+    const keyword = removeAccents(appliedSearchValue.trim().toLowerCase());
     const normalizedAppliedStartDate = appliedStartDate || null;
     const normalizedAppliedEndDate = appliedEndDate || null;
 
     return sourceProjects.filter((project) => {
       const matchesKeyword =
         !keyword ||
-        project.name.toLowerCase().includes(keyword) ||
-        project.affiliationName.toLowerCase().includes(keyword);
+        removeAccents(project.name?.toLowerCase() || "").includes(keyword) ||
+        removeAccents(project.affiliationName?.toLowerCase() || "").includes(keyword);
 
       const matchesAffiliation =
         selectedAffiliation === "all" ||
@@ -143,13 +153,13 @@ function CampaignBrowser({
 
       const matchesStartDate =
         !normalizedAppliedStartDate ||
-        (normalizedProjectEndDate !== null &&
-          normalizedProjectEndDate >= normalizedAppliedStartDate);
+        (normalizedProjectStartDate !== null &&
+          normalizedProjectStartDate >= normalizedAppliedStartDate);
 
       const matchesEndDate =
         !normalizedAppliedEndDate ||
-        (normalizedProjectStartDate !== null &&
-          normalizedProjectStartDate <= normalizedAppliedEndDate);
+        (normalizedProjectEndDate !== null &&
+          normalizedProjectEndDate <= normalizedAppliedEndDate);
 
       return (
         matchesKeyword &&
