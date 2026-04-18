@@ -9,6 +9,7 @@ import { queryClient } from "./shared/query-client";
 import LogoutPage from "./features/Logout/logout-page";
 import RegisterPage from "./features/Register/Register";
 import { ProjectDetail } from "./features/School/project-detail/projectDetail";
+import { MyProfile } from "./features/Profile/MyProfile";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -55,6 +56,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ProjectDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-profile"
+            element={
+              <ProtectedRoute>
+                <MyProfile />
               </ProtectedRoute>
             }
           />

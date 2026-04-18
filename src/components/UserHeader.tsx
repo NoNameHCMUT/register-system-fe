@@ -21,7 +21,7 @@ const getNavItemsByRole = (role?: string): NavItem[] => {
       { label: "Campaigns", to: "/" },
       { label: "List Users", to: "/admin/users" },
       { label: "List Affiliations", to: "/admin/affiliations" },
-      { label: "My Profile" },
+      { label: "My Profile", to: "/my-profile" },
     ];
   }
 
@@ -29,11 +29,11 @@ const getNavItemsByRole = (role?: string): NavItem[] => {
     return [
       { label: "Dashboard", to: "/" },
       { label: "My Campaigns", to: "/community/campaigns" },
-      { label: "My Profile" },
+      { label: "My Profile", to: "/my-profile" },
     ];
   }
 
-  return [{ label: "Campaigns", to: "/" }, { label: "My Profile" }];
+  return [{ label: "Campaigns", to: "/" }, { label: "My Profile", to: "/my-profile" }];
 };
 
 function UserHeader({ isPublic = false, role, onLogout }: UserHeaderProps) {
@@ -62,14 +62,13 @@ function UserHeader({ isPublic = false, role, onLogout }: UserHeaderProps) {
           {navItems.map((item, index) => {
             const isActive = item.to
               ? location.pathname === item.to ||
-                (item.to === "/" && location.pathname === "/")
+              (item.to === "/" && location.pathname === "/")
               : false;
 
-            const className = `flex h-full items-center border-b-2 px-2 font-semibold ${
-              isActive || (!item.to && index === 0)
-                ? "border-[#2890d4] text-[#2890d4]"
-                : "border-transparent text-[#2890d4]"
-            }`;
+            const className = `flex h-full items-center border-b-2 px-2 font-semibold ${isActive || (!item.to && index === 0)
+              ? "border-[#2890d4] text-[#2890d4]"
+              : "border-transparent text-[#2890d4]"
+              }`;
 
             if (!item.to) {
               return (

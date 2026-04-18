@@ -1,5 +1,6 @@
 import { Calendar, ChevronDown } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -116,6 +117,7 @@ function CampaignBrowser({
   const [currentPage, setCurrentPage] = useState(1);
   const [confirmRegisterProject, setConfirmRegisterProject] =
     useState<CampaignItem | null>(null);
+  const navigate = useNavigate();
 
   const canUseApprovalTabs =
     role === "admin" || role === "school" || role === "community";
@@ -142,7 +144,9 @@ function CampaignBrowser({
       const matchesKeyword =
         !keyword ||
         removeAccents(project.name?.toLowerCase() || "").includes(keyword) ||
-        removeAccents(project.affiliationName?.toLowerCase() || "").includes(keyword);
+        removeAccents(project.affiliationName?.toLowerCase() || "").includes(
+          keyword,
+        );
 
       const matchesAffiliation =
         selectedAffiliation === "all" ||
@@ -421,11 +425,10 @@ function CampaignBrowser({
                     setSelectedApprovalTab("pending");
                     setCurrentPage(1);
                   }}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold md:text-sm ${
-                    selectedApprovalTab === "pending"
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold md:text-sm ${selectedApprovalTab === "pending"
                       ? "bg-[#2b50da] text-white"
                       : "text-[#4f5b70]"
-                  }`}
+                    }`}
                 >
                   Pending approval
                 </button>
@@ -435,11 +438,10 @@ function CampaignBrowser({
                     setSelectedApprovalTab("approved");
                     setCurrentPage(1);
                   }}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold md:text-sm ${
-                    selectedApprovalTab === "approved"
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold md:text-sm ${selectedApprovalTab === "approved"
                       ? "bg-[#2b50da] text-white"
                       : "text-[#4f5b70]"
-                  }`}
+                    }`}
                 >
                   Approved
                 </button>
@@ -466,9 +468,9 @@ function CampaignBrowser({
               const slotValue =
                 project.numMax > 0
                   ? Math.min(
-                      100,
-                      Math.round((project.numAttending / project.numMax) * 100),
-                    )
+                    100,
+                    Math.round((project.numAttending / project.numMax) * 100),
+                  )
                   : 0;
 
               return (
@@ -519,33 +521,36 @@ function CampaignBrowser({
                           style={{ width: `${slotValue}%` }}
                         />
                       </div>
-
                       {showActionButton && (
                         <div
                           className={
-                            isStudentRole && showStudentRegisterAction
+                            (isStudentRole && showStudentRegisterAction) || isApproveAction
                               ? "grid grid-cols-2 gap-2"
                               : "grid grid-cols-1"
                           }
                         >
                           <button
                             type="button"
-                            onClick={() => onActionClick?.(project)}
-                            disabled={
-                              isApproveAction &&
-                              (actionLoadingProjectId === project.id ||
-                                Boolean(project.dateApproved))
-                            }
-                            className="h-11 w-full cursor-pointer rounded-xl bg-[#eceff4] text-sm font-semibold text-[#0f4ec6] transition-colors hover:bg-[#dfe4ec] disabled:cursor-not-allowed disabled:bg-[#e5e8ee] disabled:text-[#7a8497]"
+                            onClick={() => navigate("/school/detail-project", { state: { project } })}
+                            className="h-11 w-full cursor-pointer rounded-xl bg-[#eceff4] text-sm font-semibold text-[#0f4ec6] transition-colors hover:bg-[#dfe4ec]"
                           >
-                            {isApproveAction
-                              ? project.dateApproved
+                            View Details
+                          </button>
+
+                          {isApproveAction && (
+                            <button
+                              type="button"
+                              onClick={() => onActionClick?.(project)}
+                              disabled={actionLoadingProjectId === project.id || Boolean(project.dateApproved)}
+                              className="h-11 w-full cursor-pointer rounded-xl bg-[#2b50da] text-sm font-semibold text-white transition-colors hover:bg-[#2345c4] disabled:cursor-not-allowed disabled:bg-[#e5e8ee] disabled:text-[#7a8497]"
+                            >
+                              {project.dateApproved
                                 ? "Approved"
                                 : actionLoadingProjectId === project.id
                                   ? "Approving..."
-                                  : actionButtonLabel
-                              : actionButtonLabel}
-                          </button>
+                                  : actionButtonLabel}
+                            </button>
+                          )}
 
                           {isStudentRole && showStudentRegisterAction && (
                             <button
@@ -586,11 +591,10 @@ function CampaignBrowser({
                   key={page}
                   type="button"
                   onClick={() => setCurrentPage(page)}
-                  className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${
-                    page === safeCurrentPage
+                  className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${page === safeCurrentPage
                       ? "bg-[#2b50da] text-white"
                       : "border border-[#d9dee7] bg-white text-[#4f5b70]"
-                  }`}
+                    }`}
                 >
                   {page}
                 </button>

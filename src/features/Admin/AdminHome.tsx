@@ -9,18 +9,20 @@ import {
 } from "@/components/CampaignBrowser";
 import { Footer } from "@/components/Footer";
 import { UserHeader } from "@/components/UserHeader";
-import { getCommunityProjectsApi } from "@/features/Community/Dashboard/api/project.api";
 import { handleLogout } from "@/features/Login/api/logout.api";
 import { getAffiliationsApi } from "@/features/Register/api/register.api";
 import { useGetUser } from "@/shared/get-user";
+import { getAdminProjects } from "./admin.api";
+import { globalConfig } from "@/shared/api";
 
 function AdminHome() {
   const navigate = useNavigate();
   const { data: me, isLoading: isLoadingMe } = useGetUser();
   const { data: projects = [], isLoading: isLoadingProjects } = useQuery({
-    queryKey: ["community", "projects"],
-    queryFn: getCommunityProjectsApi,
+    queryKey: ["admin", "projects"],
+    queryFn: getAdminProjects,
   });
+  console.log(projects)
   const { data: affiliations = [], isLoading: isLoadingAffiliations } = useQuery(
     {
       queryKey: ["affiliations"],
@@ -35,7 +37,7 @@ function AdminHome() {
   const campaignItems = useMemo<CampaignItem[]>(() => {
     return projects.map((project) => ({
       affiliationName: project.affiliation.stdName,
-      bannerUrl: project.bannerUrl,
+      bannerUrl: `${globalConfig}/uploads${project.bannerUrl}`,
       dateApproved: project.dateApproved,
       id: project.id,
       name: project.name,
