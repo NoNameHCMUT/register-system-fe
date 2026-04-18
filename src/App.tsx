@@ -1,7 +1,7 @@
 import { Toaster } from "sonner";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { AcceptPage } from "./features/Admin/accept/accept-page";
+import { UsersPage } from "./features/Admin/users/users-page";
 import { AffiliationsPage } from "./features/Admin/affiliations/affiliations-page";
 import { CommunityHome } from "./features/Community/CommunityHome";
 import { LoginPage } from "./features/Login/login-page";
@@ -9,7 +9,6 @@ import { queryClient } from "./shared/query-client";
 import LogoutPage from "./features/Logout/logout-page";
 import RegisterPage from "./features/Register/Register";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { AdminHome } from "./features/Admin/AdminHome";
 
 function App() {
   return (
@@ -30,24 +29,24 @@ function App() {
 
         <Routes>
           <Route path="/logout" element={<LogoutPage />} />
-          <Route path="/admin" element={<AdminHome />} />
+          <Route path="/" element={<ProtectedRoute />} />
           <Route
             path="/community/campaigns"
             element={
-              // <ProtectedRoute>
+              <ProtectedRoute>
                 <CommunityHome />
-              // </ProtectedRoute>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/affiliations"
             element={
-              // <ProtectedRoute>
+              <ProtectedRoute>
                 <AffiliationsPage />
-              // </ProtectedRoute>
+              </ProtectedRoute>
             }
           />
-          <Route path="/admin/accept" element={<AcceptPage />} />
+          <Route path="/admin/users" element={<UsersPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />

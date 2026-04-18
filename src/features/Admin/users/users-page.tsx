@@ -1,5 +1,11 @@
 import { Footer } from "@/components/Footer";
-import { Search, ArrowLeft, ShieldCheck, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Search,
+  ArrowLeft,
+  ShieldCheck,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -14,7 +20,7 @@ import {
   getPendingUsersApi,
   type PendingUser,
   rejectPendingUserApi,
-} from "./api/accept.api";
+} from "./api/users.api";
 import { handleLogout } from "@/features/Login/api/logout.api";
 
 const PENDING_USERS_QUERY_KEY = ["admin", "pending-users"];
@@ -25,57 +31,11 @@ interface ExtendedUser extends PendingUser {
   phone: string;
 }
 
-const mockApprovedUsers: ExtendedUser[] = [
-  {
-    id: 1001,
-    username: "Nguyen Van A",
-    email: "abc@gmail.com",
-    role: "School",
-    fullName: "Nguyen Van A",
-    studentId: "12345",
-    isActive: false,
-    affiliationId: 1,
-    affiliation: { id: 1, stdName: "HCMUT" },
-    status: "PENDING",
-    joinedDate: "Oct 12, 2023",
-    phone: "+1 (555) 234-8901",
-  },
-  {
-    id: 1002,
-    username: "Nguyen Van B",
-    email: "bca@gmail.com",
-    role: "School",
-    fullName: "Nguyen Van B",
-    studentId: "12346",
-    isActive: true,
-    affiliationId: 1,
-    affiliation: { id: 1, stdName: "HCMUT" },
-    status: "APPROVED",
-    joinedDate: "Nov 04, 2023",
-    phone: "+1 (555) 234-8901",
-  },
-  {
-    id: 1003,
-    username: "Nguyen Van C",
-    email: "cba@gmail.com",
-    role: "Student",
-    fullName: "Nguyen Van C",
-    studentId: "12347",
-    isActive: true,
-    affiliationId: 1,
-    affiliation: { id: 1, stdName: "HCMUT" },
-    status: "APPROVED",
-    joinedDate: "Jan 15, 2024",
-    phone: "+1 (555) 234-8901",
-  },
-];
-
-function AcceptPage() {
+function UsersPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: me } = useGetUser();
-  
-  const [localApprovedUsers, setLocalApprovedUsers] = useState<ExtendedUser[]>(mockApprovedUsers);
+
   const [activeTab, setActiveTab] = useState<"all" | "pending">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewState, setViewState] = useState<"list" | "detail">("list");
@@ -90,19 +50,6 @@ function AcceptPage() {
     mutationFn: acceptPendingUserApi,
     onSuccess: (user) => {
       toast.success(`Accepted user ${user.username}.`);
-      setLocalApprovedUsers((prev) => [
-        ...prev,
-        {
-          ...user,
-          status: "APPROVED",
-          joinedDate: new Date().toLocaleDateString("en-US", {
-            month: "short",
-            day: "2-digit",
-            year: "numeric",
-          }),
-          phone: "N/A",
-        },
-      ]);
       queryClient.invalidateQueries({ queryKey: PENDING_USERS_QUERY_KEY });
       if (viewState === "detail" && selectedUser?.id === user.id) {
         setViewState("list");
@@ -134,12 +81,12 @@ function AcceptPage() {
   }, [pendingUsers]);
 
   const allUsers = useMemo(() => {
-    return [...localApprovedUsers, ...extendedPendingUsers].filter(
+    return [...extendedPendingUsers].filter(
       (u) =>
         u.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        u.email.toLowerCase().includes(searchQuery.toLowerCase())
+        u.email.toLowerCase().includes(searchQuery.toLowerCase()),
     );
-  }, [extendedPendingUsers, searchQuery, localApprovedUsers]);
+  }, [extendedPendingUsers, searchQuery]);
 
   const displayedUsers =
     activeTab === "all"
@@ -222,15 +169,17 @@ function AcceptPage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   {selectedUser.status === "PENDING" && (
                     <div className="flex flex-col items-end pt-2">
                       <button
                         onClick={() => acceptMutation.mutate(selectedUser.id)}
                         disabled={acceptMutation.isPending}
-                        className="rounded-xl bg-[#0a4b0d] px-6 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#063309] disabled:opacity-70"
+                        className="rounded-xl cursor-pointer bg-[#0a4b0d] px-6 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#063309] disabled:opacity-70"
                       >
-                        {acceptMutation.isPending ? "Approving..." : "Approve user"}
+                        {acceptMutation.isPending
+                          ? "Approving..."
+                          : "Approve user"}
                       </button>
                     </div>
                   )}
@@ -301,43 +250,40 @@ function AcceptPage() {
             List Users
           </h1>
           <p className="mt-1.5 max-w-5xl text-sm text-slate-500 md:text-base">
-            Manage all users in the system, including approving or rejecting pending registration requests.
+            Manage all users in the system, including approving or rejecting
+            pending registration requests.
           </p>
           <div className="mt-8 flex gap-8 border-b border-[#e2e6f0]">
             <button
               onClick={() => setActiveTab("all")}
-              className={`flex items-center gap-3 border-b-2 pb-4 ${
-                activeTab === "all"
-                  ? "border-[#1d74d2] text-[#1d74d2]"
-                  : "border-transparent text-[#5f6675] hover:text-[#111827]"
-              }`}
+              className={`flex items-center gap-3 border-b-2 pb-4 ${activeTab === "all"
+                ? "border-[#1d74d2] text-[#1d74d2]"
+                : "border-transparent text-[#5f6675] hover:text-[#111827]"
+                }`}
             >
               <span className="text-[15px] font-bold">Approved</span>
               <span
-                className={`rounded-md px-2 py-0.5 text-xs font-bold ${
-                  activeTab === "all"
-                    ? "bg-[#e1effe] text-[#1e5bbf]"
-                    : "bg-[#f3f4f6] text-[#6b7280]"
-                }`}
+                className={`rounded-md px-2 py-0.5 text-xs font-bold ${activeTab === "all"
+                  ? "bg-[#e1effe] text-[#1e5bbf]"
+                  : "bg-[#f3f4f6] text-[#6b7280]"
+                  }`}
               >
                 {totalUsersCount.toLocaleString()}
               </span>
             </button>
             <button
               onClick={() => setActiveTab("pending")}
-              className={`flex items-center gap-3 border-b-2 pb-4 ${
-                activeTab === "pending"
-                  ? "border-[#1d74d2] text-[#1d74d2]"
-                  : "border-transparent text-[#5f6675] hover:text-[#111827]"
-              }`}
+              className={`flex items-center gap-3 border-b-2 pb-4 ${activeTab === "pending"
+                ? "border-[#1d74d2] text-[#1d74d2]"
+                : "border-transparent text-[#5f6675] hover:text-[#111827]"
+                }`}
             >
               <span className="text-[15px] font-bold">Pending requests</span>
               <span
-                className={`rounded-md px-2 py-0.5 text-xs font-bold ${
-                  activeTab === "pending"
-                    ? "bg-[#e1effe] text-[#1e5bbf]"
-                    : "bg-[#f3f4f6] text-[#6b7280]"
-                }`}
+                className={`rounded-md px-2 py-0.5 text-xs font-bold ${activeTab === "pending"
+                  ? "bg-[#e1effe] text-[#1e5bbf]"
+                  : "bg-[#f3f4f6] text-[#6b7280]"
+                  }`}
               >
                 {pendingCount}
               </span>
@@ -387,13 +333,19 @@ function AcceptPage() {
                 <tbody className="bg-white">
                   {isLoading ? (
                     <tr>
-                      <td colSpan={5} className="py-8 text-center text-gray-500">
+                      <td
+                        colSpan={5}
+                        className="py-8 text-center text-gray-500"
+                      >
                         Loading...
                       </td>
                     </tr>
                   ) : displayedUsers.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="py-8 text-center text-gray-500">
+                      <td
+                        colSpan={5}
+                        className="py-8 text-center text-gray-500"
+                      >
                         No users found.
                       </td>
                     </tr>
@@ -438,13 +390,13 @@ function AcceptPage() {
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={(e) => handleAcceptUser(user.id, e)}
-                                className="rounded text-[13px] font-semibold text-blue-600 hover:text-blue-800"
+                                className="rounded text-[13px] cursor-pointer font-semibold text-blue-600 hover:text-blue-800"
                               >
                                 Accept
                               </button>
                               <button
                                 onClick={(e) => handleRejectUser(user.id, e)}
-                                className="rounded text-[13px] font-semibold text-red-600 hover:text-red-800"
+                                className="rounded text-[13px] cursor-pointer font-semibold text-red-600 hover:text-red-800"
                               >
                                 Reject
                               </button>
@@ -490,4 +442,4 @@ function AcceptPage() {
   );
 }
 
-export { AcceptPage };
+export { UsersPage };
