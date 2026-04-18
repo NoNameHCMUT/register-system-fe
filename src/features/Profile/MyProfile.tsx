@@ -94,12 +94,12 @@ export function MyProfile() {
                 <h3 className="text-xs font-bold tracking-[0.15em] text-[#5f6675]">
                   BASIC IDENTITY
                 </h3>
-                <div className="mt-6 grid grid-cols-1 gap-y-8 sm:grid-cols-2 md:grid-cols-4">
+                <div className="mt-6 grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3">
                   <div>
                     <div className="text-[11px] font-bold tracking-wider text-[#5f6675]">
                       EMAIL ADDRESS
                     </div>
-                    <div className="mt-2 text-sm font-medium text-[#111827]">
+                    <div className="mt-2 text-sm font-medium text-[#111827] break-all">
                       {me.email || "N/A"}
                     </div>
                   </div>
@@ -115,7 +115,7 @@ export function MyProfile() {
                     <div className="text-[11px] font-bold tracking-wider text-[#5f6675]">
                       AFFILIATIONS
                     </div>
-                    <div className="mt-2 text-sm font-medium text-[#111827]">
+                    <div className="mt-2 text-sm font-medium text-[#111827] break-words">
                       {me.affiliation?.std_name || me.affiliation?.stdName || "N/A"}
                     </div>
                   </div>

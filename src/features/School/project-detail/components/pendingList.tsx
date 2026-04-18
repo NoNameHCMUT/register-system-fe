@@ -24,8 +24,8 @@ export function PendingList({ students, onAction }: { students: any[], onAction:
               <td className="py-4 text-center text-slate-500">{s.user?.student_id}</td>
               <td className="px-8 py-4 text-right">
                 <div className="flex justify-end gap-3">
-                  <CheckCircle2 onClick={() => onAction(s.application_id, 'approve')} className="size-5 text-blue-500 cursor-pointer" />
-                  <XCircle onClick={() => onAction(s.application_id, 'reject')} className="size-5 text-red-400 cursor-pointer" />
+                  <CheckCircle2 onClick={() => onAction(s.id, 'approve')} className="size-5 text-blue-500 cursor-pointer" />
+                  <XCircle onClick={() => onAction(s.id, 'reject')} className="size-5 text-red-400 cursor-pointer" />
                 </div>
               </td>
             </tr>

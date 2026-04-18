@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { MapPin, Calendar, Info } from "lucide-react";
+import { MapPin, Calendar, Info, X } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Footer } from "@/components/Footer";
@@ -13,7 +14,7 @@ import { UserHeader } from "@/components/UserHeader";
 import { handleLogout } from "@/features/Login/api/logout.api";
 import { useGetUser } from "@/shared/get-user";
 import type { CampaignItem } from "@/components/CampaignBrowser";
-import { getApplicantsApi, batchApplicantActionApi } from "./api/prjDetail.api";
+import { getSchoolApplicantsApi, getCommunityApplicantsApi, batchSchoolApplicantActionApi, batchCommunityApplicantActionApi } from "./api/prjDetail.api";
 import { handleApiError } from "@/shared/api";
 
 export function ProjectDetail() {
@@ -23,12 +24,14 @@ export function ProjectDetail() {
 
   const project = location.state?.project as CampaignItem | undefined;
   const { data: me } = useGetUser();
-  console.log(project)
-  const showApprovalQueue = me?.role === "school";
-
+  const showApprovalQueue = me?.role === "school" || me?.role === "community";
+  const [viewingUser, setViewingUser] = useState<any>(null);
+  console.log(me?.role);
   const { data: applicants = [], isLoading } = useQuery({
     queryKey: ["project-applicants", project?.id],
-    queryFn: () => getApplicantsApi(project!.id.toString()),
+    queryFn: () => me?.role === "school"
+      ? getSchoolApplicantsApi(project!.id.toString())
+      : getCommunityApplicantsApi(project!.id.toString()),
     enabled: !!project?.id && showApprovalQueue,
   });
 
@@ -38,19 +41,23 @@ export function ProjectDetail() {
     navigate("/logout");
   };
 
-  const pendingStudents = applicants.filter((a: any) => a.status === "SCHOOL_PENDING");
-  const approvedStudents = applicants.filter((a: any) => a.status === "SCHOOL_APPROVED");
+  const pendingStudents = applicants.filter((a: any) =>
+    me?.role === "school"
+      ? a.status === "SCHOOL_PENDING"
+      : a.status === "COMMUNITY_PENDING"
+  );
+  const approvedStudents = applicants.filter((a: any) =>
+    me?.role === "community" && a.status === "APPROVED"
+  );
 
-  const actionMutation = useMutation({
-    mutationFn: batchApplicantActionApi,
+  const schoolActionMutation = useMutation({
+    mutationFn: batchSchoolApplicantActionApi,
     onSuccess: (_, variables) => {
       const msg =
         variables.action === "approve"
           ? "Đã duyệt thành công"
           : "Đã từ chối/gỡ sinh viên";
       toast.success(msg);
-      // Invalidate both broad and specific query keys to ensure refetch
-      queryClient.invalidateQueries({ queryKey: ["project-applicants"] });
       if (project?.id) {
         queryClient.invalidateQueries({ queryKey: ["project-applicants", project.id] });
         queryClient.invalidateQueries({ queryKey: ["project-applicants", String(project.id)] });
@@ -59,8 +66,38 @@ export function ProjectDetail() {
     onError: (error) => handleApiError(error),
   });
 
+
+  const communityActionMutation = useMutation({
+    mutationFn: batchCommunityApplicantActionApi,
+    onSuccess: (_, variables) => {
+      const msg =
+        variables.action === "approve"
+          ? "Đã duyệt thành công"
+          : "Đã từ chối/gỡ sinh viên";
+      toast.success(msg);
+      if (project?.id) {
+        queryClient.invalidateQueries({ queryKey: ["project-applicants", project.id] });
+        queryClient.invalidateQueries({ queryKey: ["project-applicants", String(project.id)] });
+      }
+    },
+    onError: (error) => handleApiError(error),
+  });
+
+  const handleSchoolAction = (applicationId: number, action: "approve" | "reject") => {
+    schoolActionMutation.mutate({ applicationIds: [applicationId], action });
+  };
+
+  const handleCommunityAction = (applicationId: number, action: "approve" | "reject") => {
+    communityActionMutation.mutate({ applicationIds: [applicationId], action });
+  };
+
   const handleAction = (applicationId: number, action: "approve" | "reject") => {
-    actionMutation.mutate({ applicationIds: [applicationId], action });
+    console.log(me?.role);
+    if (me?.role === "school") {
+      handleSchoolAction(applicationId, action);
+    } else {
+      handleCommunityAction(applicationId, action);
+    }
   };
 
   if (!project)
@@ -90,7 +127,7 @@ export function ProjectDetail() {
               </div>
               <div className="p-8 bg-white">
                 <Badge className="bg-blue-100 text-blue-700 border-none mb-4">
-                  {(project as any).dateApproved ? "APPROVED" : "PENDING_UNI_APPROVAL"}
+                  {(project as any).dateApproved ? "APPROVED" : "PENDING APPROVAL"}
                 </Badge>
                 <h1 className="text-3xl font-bold text-slate-900">{project.name}</h1>
                 {description && <p className="mt-2 max-w-3xl text-sm text-slate-600">{description}</p>}
@@ -152,7 +189,7 @@ export function ProjectDetail() {
             {showApprovalQueue && (
               <ApproveList
                 students={approvedStudents}
-                onAction={(sid) => handleAction(sid, "reject")}
+                onView={(user) => setViewingUser(user)}
               />
             )}
           </div>
@@ -165,6 +202,56 @@ export function ProjectDetail() {
         </div>
       </main>
       <Footer />
+
+      {viewingUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <div className="flex items-center justify-between border-b pb-4">
+              <h3 className="text-lg font-bold text-slate-800">User Details</h3>
+              <button onClick={() => setViewingUser(null)} className="text-slate-400 hover:text-slate-600">
+                <X className="size-5" />
+              </button>
+            </div>
+            <div className="mt-6 flex flex-col items-center gap-4">
+              <div className="text-center">
+                <div className="text-xl font-bold text-slate-900">{viewingUser.full_name}</div>
+                <div className="text-sm font-semibold text-blue-600 mt-1">{viewingUser.student_id}</div>
+              </div>
+            </div>
+            <div className="mt-6 space-y-4">
+              <div className="grid grid-cols-2 gap-1">
+                <div>
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Username</div>
+                  <div className="font-medium text-[15px] text-slate-700">{viewingUser.username}</div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Role</div>
+                  <div className="font-medium text-[15px] text-slate-700 uppercase">{viewingUser.role}</div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-1">
+                <div>
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email</div>
+                  <div className="font-medium text-[15px] text-slate-700 break-all">{viewingUser.email}</div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</div>
+                  <div className="font-medium text-slate-700">
+                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${viewingUser.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                      {viewingUser.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="mt-8 flex justify-end">
+              <button onClick={() => setViewingUser(null)} className="rounded-xl bg-slate-100 px-6 py-2 text-sm font-bold text-slate-700 hover:bg-slate-200">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

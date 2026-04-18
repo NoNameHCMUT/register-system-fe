@@ -28,7 +28,6 @@ const PENDING_USERS_QUERY_KEY = ["admin", "pending-users"];
 
 interface ExtendedUser extends PendingUser {
   status: "APPROVED" | "PENDING";
-  joinedDate: string;
   phone: string;
 }
 
@@ -82,7 +81,6 @@ function UsersPage() {
     return pendingUsers.map((u) => ({
       ...u,
       status: "PENDING",
-      joinedDate: "N/A",
       phone: "N/A",
     }));
   }, [pendingUsers]);
@@ -91,7 +89,6 @@ function UsersPage() {
     return activeUsers.map((u) => ({
       ...u,
       status: "APPROVED",
-      joinedDate: "N/A",
       phone: "N/A",
     }));
   }, [activeUsers]);
@@ -243,14 +240,6 @@ function UsersPage() {
                     </div>
                     <div>
                       <div className="text-[11px] font-bold tracking-wider text-[#5f6675]">
-                        JOIN DATE
-                      </div>
-                      <div className="mt-2 text-sm font-medium text-[#111827]">
-                        {selectedUser.joinedDate}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-[11px] font-bold tracking-wider text-[#5f6675]">
                         AFFILIATIONS
                       </div>
                       <div className="mt-2 text-sm font-medium text-[#111827]">
@@ -348,9 +337,6 @@ function UsersPage() {
                       ROLE
                     </th>
                     <th className="px-6 py-4 text-xs font-bold tracking-[0.1em] text-[#5f6675]">
-                      {activeTab === "all" && "JOINED DATE"}
-                    </th>
-                    <th className="px-6 py-4 text-xs font-bold tracking-[0.1em] text-[#5f6675]">
                       STATUS
                     </th>
                     <th className="px-6 py-4 text-xs font-bold tracking-[0.1em] text-[#5f6675]">
@@ -406,9 +392,6 @@ function UsersPage() {
                           <span className="inline-flex rounded-md bg-[#e1effe] px-2.5 py-1 text-[13px] font-semibold text-[#1e5bbf]">
                             {user.role}
                           </span>
-                        </td>
-                        <td className="px-6 py-5 text-[15px] text-[#445067]">
-                          {activeTab === "all" ? user.joinedDate : ""}
                         </td>
                         <td className="px-6 py-5">
                           {renderStatusBadge(user.status)}

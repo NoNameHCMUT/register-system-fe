@@ -1,6 +1,7 @@
 import axiosClient, { globalConfig } from "@/shared/api";
 
-const BATCH_ACTION_ENDPOINT = "/schools/applicants/action";
+const BATCH_SCHOOL_ACTION_ENDPOINT = "/schools/applicants/action";
+const BATCH_COMMUNITY_ACTION_ENDPOINT = "/communities/applicants/action";
 
 export interface UserInfo {
   id: number;
@@ -21,22 +22,48 @@ export interface Applicant {
   user: UserInfo;
 }
 
-const getApplicantsApi = async (projectId: string): Promise<Applicant[]> => {
+const getSchoolApplicantsApi = async (projectId: string): Promise<Applicant[]> => {
   const res = await axiosClient.get(
     `${globalConfig}/schools/projects/${projectId}/applicants`,
   );
   return res.data;
 };
 
-const batchApplicantActionApi = async (payload: {
-  applicationIds: number[];
-  action: "approve" | "reject";
-}): Promise<{ message: string }> => {
-  const res = await axiosClient.post(
-    `${globalConfig}${BATCH_ACTION_ENDPOINT}`,
-    payload,
+
+const getCommunityApplicantsApi = async (projectId: string): Promise<Applicant[]> => {
+  const res = await axiosClient.get(
+    `${globalConfig}/communities/projects/${projectId}/applicants`,
   );
   return res.data;
 };
 
-export { getApplicantsApi, batchApplicantActionApi };
+
+const batchSchoolApplicantActionApi = async (payload: {
+  applicationIds: number[];
+  action: "approve" | "reject";
+}): Promise<{ message: string }> => {
+  const res = await axiosClient.post(
+    `${globalConfig}${BATCH_SCHOOL_ACTION_ENDPOINT}`,
+    {
+      application_ids: payload.applicationIds,
+      action: payload.action,
+    }
+  );
+  return res.data;
+};
+
+const batchCommunityApplicantActionApi = async (payload: {
+  applicationIds: number[];
+  action: "approve" | "reject";
+}): Promise<{ message: string }> => {
+  const res = await axiosClient.post(
+    `${globalConfig}${BATCH_COMMUNITY_ACTION_ENDPOINT}`,
+    {
+      application_ids: payload.applicationIds,
+      action: payload.action,
+    }
+  );
+  return res.data;
+};
+
+export { getSchoolApplicantsApi, getCommunityApplicantsApi, batchSchoolApplicantActionApi, batchCommunityApplicantActionApi };
