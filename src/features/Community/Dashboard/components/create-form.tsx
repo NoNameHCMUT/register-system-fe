@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +27,7 @@ const toRfc3339 = (date: string, endOfDay = false) => {
 };
 
 function CreateForm() {
+  const queryClient = useQueryClient();
   const { data: me, isLoading: isLoadingMe } = useGetUser();
   const [projectName, setProjectName] = useState("");
   const [bannerFile, setBannerFile] = useState<File | null>(null);
@@ -92,6 +93,7 @@ function CreateForm() {
       }
 
       toast.success("Project submitted for approval.");
+      queryClient.invalidateQueries({ queryKey: ["community", "projects"] });
       setProjectName("");
       setBannerFile(null);
       setBannerUrl("");

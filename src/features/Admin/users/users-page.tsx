@@ -7,7 +7,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
@@ -18,6 +18,7 @@ import { useGetUser } from "@/shared/get-user";
 import {
   acceptPendingUserApi,
   getPendingUsersApi,
+  getActiveUsersApi,
   type PendingUser,
   rejectPendingUserApi,
 } from "./api/users.api";
@@ -41,9 +42,14 @@ function UsersPage() {
   const [viewState, setViewState] = useState<"list" | "detail">("list");
   const [selectedUser, setSelectedUser] = useState<ExtendedUser | null>(null);
 
-  const { data: pendingUsers = [], isLoading } = useQuery({
+  const { data: pendingUsers = [], isLoading: isLoadingPending } = useQuery({
     queryKey: PENDING_USERS_QUERY_KEY,
     queryFn: getPendingUsersApi,
+  });
+
+  const { data: activeUsers = [], isLoading: isLoadingActive } = useQuery({
+    queryKey: ["admin", "active-users"],
+    queryFn: getActiveUsersApi,
   });
 
   const acceptMutation = useMutation({
@@ -51,6 +57,7 @@ function UsersPage() {
     onSuccess: (user) => {
       toast.success(`Accepted user ${user.username}.`);
       queryClient.invalidateQueries({ queryKey: PENDING_USERS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ["admin", "active-users"] });
       if (viewState === "detail" && selectedUser?.id === user.id) {
         setViewState("list");
       }
@@ -80,18 +87,39 @@ function UsersPage() {
     }));
   }, [pendingUsers]);
 
+  const extendedActiveUsers: ExtendedUser[] = useMemo(() => {
+    return activeUsers.map((u) => ({
+      ...u,
+      status: "APPROVED",
+      joinedDate: "N/A",
+      phone: "N/A",
+    }));
+  }, [activeUsers]);
+
   const allUsers = useMemo(() => {
-    return [...extendedPendingUsers].filter(
+    const combined = [...extendedPendingUsers, ...extendedActiveUsers];
+    return combined.filter(
       (u) =>
         u.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
         u.email.toLowerCase().includes(searchQuery.toLowerCase()),
     );
-  }, [extendedPendingUsers, searchQuery]);
+  }, [extendedPendingUsers, extendedActiveUsers, searchQuery]);
 
-  const displayedUsers =
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, searchQuery]);
+
+  const filteredUsers =
     activeTab === "all"
-      ? allUsers
+      ? allUsers.filter((u) => u.status === "APPROVED")
       : allUsers.filter((u) => u.status === "PENDING");
+
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage) || 1;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const displayedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
 
   const handleAcceptUser = (userId: number, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -130,8 +158,8 @@ function UsersPage() {
     );
   };
 
-  const totalUsersCount = 1284;
-  const pendingCount = 12;
+  const totalUsersCount = activeUsers.length;
+  const pendingCount = pendingUsers.length;
 
   if (viewState === "detail" && selectedUser) {
     return (
@@ -331,7 +359,7 @@ function UsersPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white">
-                  {isLoading ? (
+                  {isLoadingPending || isLoadingActive ? (
                     <tr>
                       <td
                         colSpan={5}
@@ -412,23 +440,31 @@ function UsersPage() {
 
             <div className="flex items-center justify-between bg-white px-6 py-4">
               <div className="text-[13px] font-medium text-gray-500">
-                Showing <span className="font-bold text-gray-900">1-10</span> of{" "}
-                {totalUsersCount.toLocaleString()} users
+                Showing <span className="font-bold text-gray-900">{filteredUsers.length > 0 ? startIndex + 1 : 0}-{Math.min(startIndex + itemsPerPage, filteredUsers.length)}</span> of{" "}
+                {filteredUsers.length} users
               </div>
               <div className="flex items-center gap-1">
-                <button className="flex h-8 w-8 items-center justify-center rounded text-gray-400 hover:bg-gray-50 hover:text-gray-600">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="flex h-8 w-8 items-center justify-center rounded text-gray-400 hover:bg-gray-50 hover:text-gray-600 disabled:opacity-50"
+                >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
-                <button className="flex h-8 w-8 items-center justify-center rounded bg-[#1a56db] text-sm font-semibold text-white">
-                  1
-                </button>
-                <button className="flex h-8 w-8 items-center justify-center rounded text-sm font-bold text-gray-700 hover:bg-gray-50">
-                  2
-                </button>
-                <button className="flex h-8 w-8 items-center justify-center rounded text-sm font-bold text-gray-700 hover:bg-gray-50">
-                  3
-                </button>
-                <button className="flex h-8 w-8 items-center justify-center rounded text-gray-400 hover:bg-gray-50 hover:text-gray-600">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`flex h-8 w-8 items-center justify-center rounded text-sm font-semibold ${currentPage === page ? "bg-[#1a56db] text-white" : "text-gray-700 hover:bg-gray-50"}`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="flex h-8 w-8 items-center justify-center rounded text-gray-400 hover:bg-gray-50 hover:text-gray-600 disabled:opacity-50"
+                >
                   <ChevronRight className="h-4 w-4" />
                 </button>
               </div>

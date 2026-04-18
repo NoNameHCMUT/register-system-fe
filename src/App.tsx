@@ -8,6 +8,8 @@ import { LoginPage } from "./features/Login/login-page";
 import { queryClient } from "./shared/query-client";
 import LogoutPage from "./features/Logout/logout-page";
 import RegisterPage from "./features/Register/Register";
+import { ProjectDetail } from "./features/School/project-detail/projectDetail";
+import { MyProfile } from "./features/Profile/MyProfile";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -49,6 +51,22 @@ function App() {
           <Route path="/admin/users" element={<UsersPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route
+            path="/school/detail-project"
+            element={
+              <ProtectedRoute>
+                <ProjectDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-profile"
+            element={
+              <ProtectedRoute>
+                <MyProfile />
+              </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
