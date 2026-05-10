@@ -1,8 +1,16 @@
 import { Toaster } from "sonner";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { UsersPage } from "./features/Admin/users/users-page";
+import { AffiliationsPage } from "./features/Admin/affiliations/affiliations-page";
+import { CommunityHome } from "./features/Community/CommunityHome";
 import { LoginPage } from "./features/Login/login-page";
 import { queryClient } from "./shared/query-client";
+import LogoutPage from "./features/Logout/logout-page";
+import RegisterPage from "./features/Register/Register";
+import { ProjectDetail } from "./features/School/project-detail/projectDetail";
+import { MyProfile } from "./features/Profile/MyProfile";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -22,7 +30,43 @@ function App() {
         />
 
         <Routes>
-          <Route path="/" element={<LoginPage />} />
+          <Route path="/logout" element={<LogoutPage />} />
+          <Route path="/" element={<ProtectedRoute />} />
+          <Route
+            path="/community/campaigns"
+            element={
+              <ProtectedRoute>
+                <CommunityHome />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/affiliations"
+            element={
+              <ProtectedRoute>
+                <AffiliationsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/admin/users" element={<UsersPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route
+            path="/school/detail-project"
+            element={
+              <ProtectedRoute>
+                <ProjectDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-profile"
+            element={
+              <ProtectedRoute>
+                <MyProfile />
+              </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
